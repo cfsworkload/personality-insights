@@ -1,3 +1,4 @@
+---
 declared-services:
   insights-search-twitter:
     label: twitterinsights
@@ -5,7 +6,7 @@ declared-services:
 applications:
 - services:
   - insights-search-twitter
-  name: insights-search
-  host: insights-search
+  name: insights-search-cloudant
+  host: insights-search-cloudant
   path: .
   memory: 256M

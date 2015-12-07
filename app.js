@@ -38,9 +38,7 @@ function initDBConnection() {
 		dbCredentials.url = "https://ffe37731-0505-4683-96a8-87d02a33e03e-bluemix:c7003d0b156d9c4ce856c4e6b4427f3b576c7ea6229235f0369ada1ed47b159c@ffe37731-0505-4683-96a8-87d02a33e03e-bluemix.cloudant.com";
     }
 
-	console.log("\n\ngot here!\n");
 	cloudant = require('cloudant')(dbCredentials.url);
-	console.log("\nalso got here!\n\n");
 	
 	//check if DB exists if not create
 	cloudant.db.create(dbCredentials.dbName, function (err, res) {
@@ -151,7 +149,18 @@ app.get("/api/1/messages/search", function (req, res) {
       res.sendStatus(500);
     }
     
-    console.log(body);
+//    console.log(body);
+//    var jsonStuff = JSON.parse(body);
+//    console.log("parsed successfully");
+//    console.log(jsonStuff.tweets);
+	console.log(JSON.stringify(body));
+	var tweets = JSON.parse(JSON.stringify(body.tweets));
+	for(var i in tweets) {
+		 //console.log(tweets[i]);
+		 console.log("attempting to insert into DB...");
+		 console.log(JSON.stringify(tweets[i]));
+		 insertTweetIntoDB(tweets[i]);
+	}
     
     res.send(body);
   });

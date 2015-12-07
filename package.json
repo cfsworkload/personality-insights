@@ -14,7 +14,8 @@
     "express": "4.12.x",
     "moment": "^2.10.6",
     "request": "^2.60.0",
-    "yargs": "^3.27.0"
+    "yargs": "^3.27.0",
+    "cloudant": "*"
   },
   "engines": {
     "node": "0.12.x"

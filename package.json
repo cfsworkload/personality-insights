@@ -1,5 +1,5 @@
 {
-  "name": "insights-search",
+  "name": "insights-search-cloudant",
   "version": "0.0.1",
   "description": "A search interface for IBM Insights for Twitter",
   "scripts": {
@@ -27,12 +27,12 @@
   "author": "IBM Corp.",
   "contributors": [
     {
-      "name": "Frederic Lavigne",
-      "email": "frederic.lavigne@fr.ibm.com"
+      "name": "Nathan Chaney",
+      "email": "nrchaney@us.ibm.com"
     }
   ],
   "bugs": {
-    "url": "https://github.com/IBM-Bluemix/insights-search/issues"
+    "url": "https://hub.jazz.net/git/nrchaney/insights-search-cloudant"
   },
   "license": "Apache-2.0"
 }

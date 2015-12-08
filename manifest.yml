@@ -3,9 +3,17 @@ declared-services:
   insights-search-twitter:
     label: twitterinsights
     plan: Free
+  insights-search-cloudant:
+    label: cloudantNoSQLDB
+    plan: Shared
+  insights-search-personality:
+    label: personality_insights
+    plan: tiered
 applications:
 - services:
   - insights-search-twitter
+  - insights-search-cloudant
+  - insights-search-personality
   name: insights-search-cloudant
   host: insights-search-cloudant
   path: .

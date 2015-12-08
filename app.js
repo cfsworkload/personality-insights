@@ -4,71 +4,45 @@ var
   app = express(),
   cfenv = require('cfenv');
 
-var db;
+//---Cloudant Database Creation-------------------------------------------------
+
+var cloudantDB;
 var cloudant;
-var dbCredentials = {
+var cloudantCredentials = {
 	dbName : 'twitter_db'
 };
-
-//---Database Creation----------------------------------------------------------
 
 //Get the port and host name from the environment variables
 var port = (process.env.VCAP_APP_PORT || 3000);
 var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
 
 //setup cloudant db
-function initDBConnection() {
+function initCloudantDBConnection() {
 	if(process.env.VCAP_SERVICES) {
 		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
 		if(vcapServices.cloudantNoSQLDB) {
-			dbCredentials.host = vcapServices.cloudantNoSQLDB[0].credentials.host;
-			dbCredentials.port = vcapServices.cloudantNoSQLDB[0].credentials.port;
-			dbCredentials.user = vcapServices.cloudantNoSQLDB[0].credentials.username;
-			dbCredentials.password = vcapServices.cloudantNoSQLDB[0].credentials.password;
-			dbCredentials.url = vcapServices.cloudantNoSQLDB[0].credentials.url;
+			cloudantCredentials.host = vcapServices.cloudantNoSQLDB[0].credentials.host;
+			cloudantCredentials.port = vcapServices.cloudantNoSQLDB[0].credentials.port;
+			cloudantCredentials.user = vcapServices.cloudantNoSQLDB[0].credentials.username;
+			cloudantCredentials.password = vcapServices.cloudantNoSQLDB[0].credentials.password;
+			cloudantCredentials.url = vcapServices.cloudantNoSQLDB[0].credentials.url;
 		}
 		console.log('VCAP Services: '+JSON.stringify(process.env.VCAP_SERVICES));
 	}
     else {
     	console.log("Unable to find Cloudant credentials");
-		dbCredentials.host = "ffe37731-0505-4683-96a8-87d02a33e03e-bluemix.cloudant.com";
-		dbCredentials.port = 443;
-		dbCredentials.user = "ffe37731-0505-4683-96a8-87d02a33e03e-bluemix";
-		dbCredentials.password = "c7003d0b156d9c4ce856c4e6b4427f3b576c7ea6229235f0369ada1ed47b159c";
-		dbCredentials.url = "https://ffe37731-0505-4683-96a8-87d02a33e03e-bluemix:c7003d0b156d9c4ce856c4e6b4427f3b576c7ea6229235f0369ada1ed47b159c@ffe37731-0505-4683-96a8-87d02a33e03e-bluemix.cloudant.com";
     }
 
-	cloudant = require('cloudant')(dbCredentials.url);
+	cloudant = require('cloudant')(cloudantCredentials.url);
 	
 	//check if DB exists if not create
-	cloudant.db.create(dbCredentials.dbName, function (err, res) {
-		if (err) { console.log('could not create db ', err); }
+	cloudant.db.create(cloudantCredentials.dbName, function (err, res) {
+		if (err) { console.log('could not create db', err); }
     });
-	db = cloudant.use(dbCredentials.dbName);
+	cloudantDB = cloudant.use(cloudantCredentials.dbName);
 }
 
-initDBConnection();
-
-//---Deployment Tracker---------------------------------------------------------
-require("cf-deployment-tracker-client").track();
-
-// load local VCAP configuration
-var vcapLocal = null
-try {
-  vcapLocal = require("./vcap-local.json");
-  console.log("Loaded local VCAP", vcapLocal);
-} catch (e) {
-  console.error(e);
-}
-
-// get the app environment from Cloud Foundry, defaulting to local VCAP
-var appEnvOpts = vcapLocal ? {
-  vcap: vcapLocal
-} : {}
-var appEnv = cfenv.getAppEnv(appEnvOpts);
-
-var twitterCreds = appEnv.getServiceCreds("insights-search-twitter");
-var twitter = require('./lib/twitter.js')(twitterCreds.url);
+initCloudantDBConnection();
 
 function insertTweetIntoDB(tweet) {
 	//var tweet = JSON.parse(jsonTweet);
@@ -100,12 +74,11 @@ function insertTweetIntoDB(tweet) {
 	// userListedCount			message.actor.listedCount
 	// userStatusesCount		message.actor.StatusesCount
 	//db.insert({"Topic": packet.topic, "Message": packet.payload.toString("utf8")}, function(err, body) {
-	db.insert({"msgId": tweet.message.id,
+	cloudantDB.insert({"msgId": tweet.message.id,
 			"msgType": tweet.message.verb,
 			"msgPostedTime": tweet.message.postedTime,
 			"msgBody": tweet.message.body,
 			"msgFavoritesCount": tweet.message.favoritesCount,
-			"msgHashtags": tweet.message.twitter_entities.hashtags,
 			"smaAuthorCountry": tweet.cde.author.location.country,
 			"smaAuthorState": tweet.cde.author.location.state,
 			"smaAuthorCity": tweet.cde.author.location.city,
@@ -124,9 +97,78 @@ function insertTweetIntoDB(tweet) {
 			}, function(err, body) {
  				if (!err)
     				console.log(body);
+    			else
+    				console.log("Error inserting data into cloudant", err);
 			}
 	);
 }
+
+//--DashDB Creation-------------------------------------------------------------
+
+var dashDBcredentials = {};
+var dashDB;
+
+function initDashDBConnection() {
+	if(process.env.VCAP_SERVICES) {
+		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+		if(vcapServices.dashDB) {
+			dashDBcredentials.dsn = vcapServices.dashDB[0].credentials.dsn;
+			console.log("dashDB dsn: " + dashDBcredentials.dsn);
+		}
+	}
+    else {
+    	console.log("Unable to find dashDB credentials");
+    }
+
+	dashDB = require('ibm_db');
+}
+
+initDashDBConnection();
+
+//--Watson Personality Insights-------------------------------------------------
+
+var watson = require('watson-developer-cloud');
+var extend = require('util')._extend;
+
+var personalityInsightsCredentials;
+var personalityInsights;
+
+function initPersonalityInsights() {
+	if(process.env.VCAP_SERVICES) {
+		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+		if(vcapServices.personality_insights) {
+			personalityInsightsCredentials = extend({version: 'v2'}, vcapServices.personality_insights[0].credentials);
+		}
+	}
+    else {
+    	console.log("Unable to find Personality Insights credentials");
+    }
+
+	personalityInsights = watson.personality_insights(personalityInsightsCredentials);
+}
+
+initPersonalityInsights();
+
+//---Deployment Tracker---------------------------------------------------------
+require("cf-deployment-tracker-client").track();
+
+// load local VCAP configuration
+var vcapLocal = null
+try {
+  vcapLocal = require("./vcap-local.json");
+  console.log("Loaded local VCAP", vcapLocal);
+} catch (e) {
+  console.error(e);
+}
+
+// get the app environment from Cloud Foundry, defaulting to local VCAP
+var appEnvOpts = vcapLocal ? {
+  vcap: vcapLocal
+} : {};
+var appEnv = cfenv.getAppEnv(appEnvOpts);
+
+var twitterCreds = appEnv.getServiceCreds("insights-search-twitter");
+var twitter = require('./lib/twitter.js')(twitterCreds.url);
 
 app.get("/api/1/messages/count", function (req, res) {
   console.log("Counting with", req.query.q);
@@ -144,7 +186,9 @@ app.get("/api/1/messages/count", function (req, res) {
 app.get("/api/1/messages/search", function (req, res) {
   console.log("Searching with", req.query.q);
   // limit to the first 20 tweets
-  twitter.search(req.query.q, 20, 0, function (error, body) {
+  var numTweets = 20;// default is 100, max is 500
+  var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
+  twitter.search(req.query.q, numTweets, tweetIndex, function (error, body) {
     if (error) {
       res.sendStatus(500);
     }
@@ -193,6 +237,44 @@ app.get("/api/1/tracks/:id/messages/search", function (req, res) {
       res.sendStatus(500);
     }
     res.send(body);
+  });
+});
+
+app.get("/select", function(req, res) {
+	dashDB.open(dashDBcredentials.dsn, function(err, conn) {
+		if(err) {
+			console.log("Unable to connect to dashDB");
+			console.error("Error: ", err);
+			return;
+		} else {
+			var query = "SELECT MSGBODY FROM TWITTER_DB WHERE USERPREFERREDUSERNAME = 'BarackObama'";
+			conn.query(query, function(err, rows) {
+				if(err) {
+					console.log("Unable to query dashDB");
+					console.error("Error: ", err);
+					return;
+				} else {
+					var rowText = JSON.parse(JSON.stringify(rows));
+					var text = "";
+					for(var i in rowText) {
+						text += rowText[i].MSGBODY + "\n\n";
+					}
+					res.send(text);
+					conn.close(function() {
+						console.log("Connection closed successfully.");
+					});
+				}
+			});
+		}
+	});
+});
+
+app.post('/', function(req, res, next) {
+  personalityInsights.profile(req.body, function(err, profile) {
+    if (err)
+      return next(err);
+    else
+      return res.json(profile);
   });
 });
 

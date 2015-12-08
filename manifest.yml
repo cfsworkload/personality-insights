@@ -9,11 +9,15 @@ declared-services:
   insights-search-personality:
     label: personality_insights
     plan: tiered
+  insights-search-dashdb:
+    label: dashDB
+    plan: Entry
 applications:
 - services:
   - insights-search-twitter
   - insights-search-cloudant
   - insights-search-personality
+  - insights-search-dashdb
   name: insights-search-cloudant
   host: insights-search-cloudant
   path: .

@@ -15,7 +15,9 @@
     "moment": "^2.10.6",
     "request": "^2.60.0",
     "yargs": "^3.27.0",
-    "cloudant": "*"
+    "cloudant": "*",
+    "ibm_db": "*",
+    "watson-developer-cloud": "*"
   },
   "engines": {
     "node": "0.12.x"

@@ -9,6 +9,6 @@
     "Name": "insights-search-cloudant",
     "Instrumentation": {}
   },
-  "Path": "",
+  "Path": "manifest.yml",
   "Type": "Cloud Foundry"
 }

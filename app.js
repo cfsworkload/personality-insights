@@ -4,6 +4,11 @@ var
   app = express(),
   cfenv = require('cfenv');
 
+require('./config/express')(app);
+
+// error-handler settings
+//require('./config/error-handler')(app);
+
 //---Cloudant Database Creation-------------------------------------------------
 
 var cloudantDB;
@@ -37,7 +42,7 @@ function initCloudantDBConnection() {
 	
 	//check if DB exists if not create
 	cloudant.db.create(cloudantCredentials.dbName, function (err, res) {
-		if (err) { console.log('could not create db', err); }
+		if (err) { console.log('could not create db'/*, err*/); }
     });
 	cloudantDB = cloudant.use(cloudantCredentials.dbName);
 }
@@ -74,6 +79,7 @@ function insertTweetIntoDB(tweet) {
 	// userListedCount			message.actor.listedCount
 	// userStatusesCount		message.actor.StatusesCount
 	//db.insert({"Topic": packet.topic, "Message": packet.payload.toString("utf8")}, function(err, body) {
+	//queryDB("SELECT MSGID FROM TWITTER_DB WHERE MSG ID = " + tweet.message.id);
 	cloudantDB.insert({"msgId": tweet.message.id,
 			"msgType": tweet.message.verb,
 			"msgPostedTime": tweet.message.postedTime,
@@ -125,6 +131,37 @@ function initDashDBConnection() {
 
 initDashDBConnection();
 
+function queryDB(query, result) {
+	console.log("attempting to query dashDB with " + query);
+	dashDB.open(dashDBcredentials.dsn, function(err, conn) {
+		if(err) {
+			console.log("Unable to connect to dashDB");
+			console.error("Error: ", err);
+			return;
+		} else {
+			conn.query(query, function(err, rows) {
+				if(err) {
+					console.log("Unable to query dashDB");
+					console.error("Error: ", err);
+					return;
+				} else {
+					var rowText = JSON.parse(JSON.stringify(rows));
+					var text = "";
+					for(var i in rowText) {
+						text += rowText[i].MSGBODY + "\n\n";
+					}
+					conn.close(function() {
+						console.log("Connection closed successfully.");
+					});
+					
+					console.log("queryDB text: " + text);
+					result(text);
+				}
+			});
+		}
+	});
+}
+
 //--Watson Personality Insights-------------------------------------------------
 
 var watson = require('watson-developer-cloud');
@@ -148,6 +185,11 @@ function initPersonalityInsights() {
 }
 
 initPersonalityInsights();
+
+//var i18n = require('i18next');
+
+//i18n settings
+//require('./config/i18n')(app);
 
 //---Deployment Tracker---------------------------------------------------------
 require("cf-deployment-tracker-client").track();
@@ -232,12 +274,21 @@ app.get("/api/1/tracks/:id/messages/count", function (req, res) {
 
 app.get("/api/1/tracks/:id/messages/search", function (req, res) {
   console.log("Searching track", req.params.id, "with", req.query.q);
-  twitter.searchTrack(req.params.id, req.query.q, 20, 0, function (error, body) {
+  // limit to the first 20 tweets
+  var numTweets = 20;// default is 100, max is 500
+  var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
+  twitter.searchTrack(req.params.id, req.query.q, numTweets, tweetIndex, function (error, body) {
     if (error) {
       res.sendStatus(500);
     }
     res.send(body);
   });
+});
+
+app.get("specialSelect", function(req, res) {
+	var result;
+	queryDB("SELECT MSGBODY FROM TWITTER_DB WHERE USERPREFERREDUSERNAME = 'BarackObama'", result);
+	res.send(result);
 });
 
 app.get("/select", function(req, res) {
@@ -269,7 +320,15 @@ app.get("/select", function(req, res) {
 	});
 });
 
-app.post('/', function(req, res, next) {
+app.post('/personality', function(req, res, next) {
+//app.get('/personality', function(req, res) {
+  //var parameters = extend(req.body, { acceptLanguage : i18n.lng() });
+
+  console.log("finding personality insights...");
+  //console.log(req);
+  //console.log("here's the body...");
+  //console.log(req.body);
+
   personalityInsights.profile(req.body, function(err, profile) {
     if (err)
       return next(err);

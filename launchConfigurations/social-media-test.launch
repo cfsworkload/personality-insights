@@ -6,8 +6,10 @@
       "Org": "NRChaney",
       "Space": "Work"
     },
-    "Name": "insights-search-cloudant",
-    "Instrumentation": {}
+    "Name": "social-media-test",
+    "Instrumentation": {
+      "domain": "mybluemix.net"
+    }
   },
   "Path": "manifest.yml",
   "Type": "Cloud Foundry"

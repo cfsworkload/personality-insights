@@ -1,23 +1,19 @@
 ---
 declared-services:
-  insights-search-twitter:
+  social-media-test-twitter:
     label: twitterinsights
     plan: Free
-  insights-search-cloudant:
-    label: cloudantNoSQLDB
-    plan: Shared
-  insights-search-personality:
+  social-media-test-personality:
     label: personality_insights
     plan: tiered
-  insights-search-dashdb:
+  social-media-test-dashdb:
     label: dashDB
     plan: Entry
 applications:
 - services:
-  - insights-search-twitter
-  - insights-search-cloudant
-  - insights-search-personality
-  - insights-search-dashdb
+  - social-media-test-twitter
+  - social-media-test-personality
+  - social-media-test-dashdb
   name: social-media-test
   host: social-media-test
   path: .

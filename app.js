@@ -9,112 +9,12 @@ require('./config/express')(app);
 // error-handler settings
 //require('./config/error-handler')(app);
 
-//---Cloudant Database Creation-------------------------------------------------
-
-var cloudantDB;
-var cloudant;
-var cloudantCredentials = {
-	dbName : 'twitter_db'
-};
-
-//Get the port and host name from the environment variables
-var port = (process.env.VCAP_APP_PORT || 3000);
-var host = (process.env.VCAP_APP_HOST || '0.0.0.0');
-
-//setup cloudant db
-function initCloudantDBConnection() {
-	if(process.env.VCAP_SERVICES) {
-		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
-		if(vcapServices.cloudantNoSQLDB) {
-			cloudantCredentials.host = vcapServices.cloudantNoSQLDB[0].credentials.host;
-			cloudantCredentials.port = vcapServices.cloudantNoSQLDB[0].credentials.port;
-			cloudantCredentials.user = vcapServices.cloudantNoSQLDB[0].credentials.username;
-			cloudantCredentials.password = vcapServices.cloudantNoSQLDB[0].credentials.password;
-			cloudantCredentials.url = vcapServices.cloudantNoSQLDB[0].credentials.url;
-		}
-		console.log('VCAP Services: '+JSON.stringify(process.env.VCAP_SERVICES));
-	}
-    else {
-    	console.log("Unable to find Cloudant credentials");
-    }
-
-	cloudant = require('cloudant')(cloudantCredentials.url);
-	
-	//check if DB exists if not create
-	cloudant.db.create(cloudantCredentials.dbName, function (err, res) {
-		if (err) { console.log('could not create db'/*, err*/); }
-    });
-	cloudantDB = cloudant.use(cloudantCredentials.dbName);
-}
-
-initCloudantDBConnection();
-
-function insertTweetIntoDB(tweet) {
-	//var tweet = JSON.parse(jsonTweet);
-	
-	// msgId					message.id
-	// msgType					message.verb
-	// msgPostedTime			message.postedTime
-	// msgBody					message.body
-	// msgFavoritesCount		message.favoritesCount
-	// msgHashtags				message.twitter_entities.hashtags
-	// 							message.gnip.profileLocations.geo.type
-	// 							message.gnip.profileLocations.geo.coordinates
-	// smaAuthorCountry			cde.author.location.country
-	// smaAuthorState			cde.author.location.state
-	// smaAuthorCity			cde.author.location.city
-	// smaAuthorGender			cde.author.gender
-	// smaSentiment				cde.content.sentiment.polarity
-	// smaIsParent				cde.author.parenthood.isParent
-	// smaIsMarried				cde.author.maritalStatus.isMarried
-	// userId					message.actor.id
-	// userDisplayName			message.actor.displayName
-	// userPreferredUsername	message.actor.preferredUsername
-	// 							message.actor.links.href
-	// 							message.actor.location.displayName
-	// 							message.actor.utcOffset
-	// userLanguage				message.actor.languages
-	// userFollowersCount		message.actor.followersCount
-	// userFriendsCount			message.actor.friendsCount
-	// userListedCount			message.actor.listedCount
-	// userStatusesCount		message.actor.StatusesCount
-	//db.insert({"Topic": packet.topic, "Message": packet.payload.toString("utf8")}, function(err, body) {
-	//queryDB("SELECT MSGID FROM TWITTER_DB WHERE MSG ID = " + tweet.message.id);
-	cloudantDB.insert({"msgId": tweet.message.id,
-			"msgType": tweet.message.verb,
-			"msgPostedTime": tweet.message.postedTime,
-			"msgBody": tweet.message.body,
-			"msgFavoritesCount": tweet.message.favoritesCount,
-			"smaAuthorCountry": tweet.cde.author.location.country,
-			"smaAuthorState": tweet.cde.author.location.state,
-			"smaAuthorCity": tweet.cde.author.location.city,
-			"smaAuthorGender": tweet.cde.author.gender,
-			"smaSentiment": tweet.cde.content.sentiment.polarity,
-			"smaIsParent": tweet.cde.author.parenthood.isParent,
-			"smaIsMarried": tweet.cde.author.maritalStatus.isMarried,
-			"userId": tweet.message.actor.id,
-			"userDisplayName": tweet.message.actor.displayName,
-			"userPreferredUsername": tweet.message.actor.preferredUsername,
-			"userLanguage": tweet.message.actor.languages,
-			"userFollowersCount": tweet.message.actor.followersCount,
-			"userFriendsCount": tweet.message.actor.friendsCount,
-			"userListedCount": tweet.message.actor.listedCount,
-			"userStatusesCount": tweet.message.actor.StatusesCount
-			}, function(err, body) {
- 				if (!err)
-    				console.log(body);
-    			else
-    				console.log("Error inserting data into cloudant", err);
-			}
-	);
-}
-
 //--DashDB Creation-------------------------------------------------------------
 
 var dashDBcredentials = {};
-var dashDB;
+var db;
 
-function initDashDBConnection() {
+function initDBConnection() {
 	if(process.env.VCAP_SERVICES) {
 		var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
 		if(vcapServices.dashDB) {
@@ -126,14 +26,65 @@ function initDashDBConnection() {
     	console.log("Unable to find dashDB credentials");
     }
 
-	dashDB = require('ibm_db');
+	db = require('ibm_db');
+	
+	db.open(dashDBcredentials.dsn, function(err,conn) {
+		if(err) {
+			console.log("Unable to connect to dashDB");
+			console.error("Error: ", err);
+			return;
+		}
+			
+		var createTableStatement = 'CREATE TABLE "TWITTER_DB" (' +
+				'"MESSAGE_ID" VARCHAR(256), ' +
+				'"MESSAGE_BODY" VARCHAR(1024), ' +
+				'"MESSAGE_FAVORITES_COUNT" BIGINT, ' +
+				'"MESSAGE_POSTED_TIME" VARCHAR(32), ' +
+				'"MESSAGE_TYPE" VARCHAR(8), ' +
+				'"SENTIMENT" VARCHAR(16), ' +
+				'"AUTHOR_CITY" VARCHAR(64), ' +
+				'"AUTHOR_STATE" VARCHAR(64), ' +
+				'"AUTHOR_COUNTRY" VARCHAR(64), ' +
+				'"AUTHOR_GENDER" VARCHAR(8), ' +
+				'"AUTHOR_IS_MARRIED" VARCHAR(8), ' +
+				'"AUTHOR_IS_PARENT" VARCHAR(8), ' +
+				'"AUTHOR_PREFERRED_USERNAME" VARCHAR(128), ' +
+				'"AUTHOR_DISPLAY_NAME" VARCHAR(64), ' +
+				'"AUTHOR_FOLLOWER_COUNT" BIGINT, ' +
+				'"AUTHOR_FRIEND_COUNT" BIGINT, ' +
+				'"AUTHOR_ID" VARCHAR(128), ' +
+				'"AUTHOR_LISTED_COUNT" BIGINT);';
+			
+		console.log("attempting to create table...");
+		console.log("create table statement: " + createTableStatement);
+			
+		conn.prepare(createTableStatement, function (err, stmt) {
+			if (err) {
+				//could not prepare for some reason
+				console.log(err);
+				return conn.closeSync();
+			}
+
+			//Bind and Execute the statment asynchronously
+			stmt.execute(['something', 42], function (err, result) {
+				if( err ) console.log(err);  
+				else result.closeSync();
+
+				//Close the connection
+				conn.close(function(err) {
+					if(err) console.log("Problem disconnecting from dashDB");
+					else console.log("Connection closed successfully.");
+				});
+			});
+		});
+	});
 }
 
-initDashDBConnection();
+initDBConnection();
 
 function queryDB(query, result) {
 	console.log("attempting to query dashDB with " + query);
-	dashDB.open(dashDBcredentials.dsn, function(err, conn) {
+	db.open(dashDBcredentials.dsn, function(err, conn) {
 		if(err) {
 			console.log("Unable to connect to dashDB");
 			console.error("Error: ", err);
@@ -150,8 +101,9 @@ function queryDB(query, result) {
 					for(var i in rowText) {
 						text += rowText[i].MSGBODY + "\n\n";
 					}
-					conn.close(function() {
-						console.log("Connection closed successfully.");
+					conn.close(function(err) {
+						if(err) console.log("Problem disconnecting from dashDB");
+						else console.log("Connection closed successfully.");
 					});
 					
 					console.log("queryDB text: " + text);
@@ -159,6 +111,75 @@ function queryDB(query, result) {
 				}
 			});
 		}
+	});
+}
+
+function insertTweetIntoDB(data) {
+	console.log("attempting to insert " + data + " into dashDB");
+	
+	var tweet = JSON.parse(data);
+	
+	console.log(tweet);
+	
+	db.open(dashDBcredentials.dsn, function(err, conn) {
+		if(err) {
+			console.log("Unable to connect to dashDB");
+			console.error("Error: ", err);
+			return;
+		}
+		
+		// unfortunately javascript parses json strangely, so we need to break down the data
+		var message = JSON.parse(JSON.stringify(tweet.message));
+		var content = JSON.parse(JSON.stringify(tweet.cde.content));
+		var sentiment = JSON.parse(JSON.stringify(content.sentiment));
+		var author = JSON.parse(JSON.stringify(tweet.cde.author));
+		var location = JSON.parse(JSON.stringify(author.location));
+		var actor = JSON.parse(JSON.stringify(message.actor));
+		
+		// may want to query based on message_id to not add duplicates
+		
+		var insertStatement = "INSERT INTO TWITTER_DB VALUES ('" +
+				message.id + "', '" +
+				message.body + "', " +
+				message.favoritesCount + ", '" +
+				message.postedTime + "', '" +
+				message.verb + "', '" +
+				sentiment.polarity + "', '" +
+				location.city + "', '" +
+				location.state + "', '" +
+				location.country + "', '" +
+				author.gender + "', '" +
+				author.maritalStatus.isMarried + "', '" +
+				author.parenthood.isParent + "', '" +
+				actor.preferredUsername + "', '" +
+				actor.displayName + "', " +
+				actor.followersCount + ", " +
+				actor.friendsCount + ", '" +
+				actor.id + "', " +
+				actor.listedCount + ");";
+			
+		console.log("attempting to insert data...");
+		console.log("insert statement: " + insertStatement);
+			
+		conn.prepare(insertStatement, function (err, stmt) {
+			if (err) {
+				//could not prepare for some reason
+				console.log(err);
+				return conn.closeSync();
+			}
+
+			//Bind and Execute the statment asynchronously
+			stmt.execute(['something', 42], function (err, result) {
+				if( err ) console.log(err);  
+				else result.closeSync();
+
+				//Close the connection
+				conn.close(function(err) {
+					if(err) console.log("Problem disconnecting from dashDB");
+					else console.log("Connection closed successfully.");
+				});
+			});
+		});
 	});
 }
 
@@ -209,7 +230,7 @@ var appEnvOpts = vcapLocal ? {
 } : {};
 var appEnv = cfenv.getAppEnv(appEnvOpts);
 
-var twitterCreds = appEnv.getServiceCreds("insights-search-twitter");
+var twitterCreds = appEnv.getServiceCreds("social-media-test-twitter");
 var twitter = require('./lib/twitter.js')(twitterCreds.url);
 
 app.get("/api/1/messages/count", function (req, res) {
@@ -244,8 +265,8 @@ app.get("/api/1/messages/search", function (req, res) {
 	for(var i in tweets) {
 		 //console.log(tweets[i]);
 		 console.log("attempting to insert into DB...");
-		 console.log(JSON.stringify(tweets[i]));
-		 insertTweetIntoDB(tweets[i]);
+		 //console.log(JSON.stringify(tweets[i]));
+		 insertTweetIntoDB(JSON.stringify(tweets[i]));
 	}
     
     res.send(body);
@@ -287,18 +308,18 @@ app.get("/api/1/tracks/:id/messages/search", function (req, res) {
 
 app.get("specialSelect", function(req, res) {
 	var result;
-	queryDB("SELECT MSGBODY FROM TWITTER_DB WHERE USERPREFERREDUSERNAME = 'BarackObama'", result);
+	queryDB("SELECT MSG_BODY FROM TWITTER_DB WHERE USER_PREFERRED_USERNAME = 'BarackObama'", result);
 	res.send(result);
 });
 
 app.get("/select", function(req, res) {
-	dashDB.open(dashDBcredentials.dsn, function(err, conn) {
+	db.open(dashDBcredentials.dsn, function(err, conn) {
 		if(err) {
 			console.log("Unable to connect to dashDB");
 			console.error("Error: ", err);
 			return;
 		} else {
-			var query = "SELECT MSGBODY FROM TWITTER_DB WHERE USERPREFERREDUSERNAME = 'BarackObama'";
+			var query = "SELECT MSG_BODY FROM TWITTER_DB WHERE USER_PREFERRED_USERNAME = 'BarackObama'";
 			conn.query(query, function(err, rows) {
 				if(err) {
 					console.log("Unable to query dashDB");

@@ -18,7 +18,7 @@ applications:
   - insights-search-cloudant
   - insights-search-personality
   - insights-search-dashdb
-  name: insights-search-cloudant
-  host: insights-search-cloudant
+  name: social-media-test
+  host: social-media-test
   path: .
   memory: 256M

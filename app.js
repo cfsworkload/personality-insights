@@ -306,7 +306,7 @@ app.get("/api/1/tracks/:id/messages/search", function (req, res) {
   });
 });
 
-app.get("specialSelect", function(req, res) {
+/*app.get("specialSelect", function(req, res) {
 	var result;
 	queryDB("SELECT MSG_BODY FROM TWITTER_DB WHERE USER_PREFERRED_USERNAME = 'BarackObama'", result);
 	res.send(result);
@@ -339,16 +339,43 @@ app.get("/select", function(req, res) {
 			});
 		}
 	});
+});*/
+
+app.post('/api/select', function(req, res) {
+	db.open(dashDBcredentials.dsn, function(err, conn) {
+		if(err) {
+			console.log("Unable to connect to dashDB");
+			console.error("Error: ", err);
+			return;
+		} else {
+			var query = "SELECT MESSAGE_BODY FROM TWITTER_DB WHERE AUTHOR_PREFERRED_USERNAME = '" + req.body.name + "'";
+			console.log("query statement: " + query);
+			conn.query(query, function(err, rows) {
+				if(err) {
+					console.log("Unable to query dashDB");
+					console.error("Error: ", err);
+					return;
+				} else {
+					var rowText = JSON.parse(JSON.stringify(rows));
+					var text = "";
+					for(var i in rowText) {
+						text += rowText[i].MESSAGE_BODY + "\n\n";
+					}
+					console.log("query result: " + text);
+					res.send(text);
+					conn.close(function() {
+						console.log("Connection closed successfully.");
+					});
+				}
+			});
+		}
+	});
 });
 
-app.post('/personality', function(req, res, next) {
-//app.get('/personality', function(req, res) {
+app.post('/api/profile', function(req, res, next) {
   //var parameters = extend(req.body, { acceptLanguage : i18n.lng() });
 
   console.log("finding personality insights...");
-  //console.log(req);
-  //console.log("here's the body...");
-  //console.log(req.body);
 
   personalityInsights.profile(req.body, function(err, profile) {
     if (err)

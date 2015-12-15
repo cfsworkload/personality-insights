@@ -90,49 +90,54 @@ $(document).ready(function() {
     $traits.hide();
     $results.hide();
 
-    $.ajax({
-      headers:{
-        'csrf-token': $('meta[name="ct"]').attr('content')
-      },
-      type: 'POST',
-      data: {
-        recaptcha: recaptcha,
-        text: $content.val(),
-        language: language
-      },
-      url: '/personality',
-      dataType: 'json',
-      success: function(response) {
-        $loading.hide();
 
-        if (response.error) {
-          showError(response.error);
-        } else {
-          $results.show();
-          showTraits(response);
-          showTextSummary(response);
-          showVizualization(response);
-        }
+    $.post("/api/select",
+    {
+        name: $content.val()
+    }, function(data) {
+        $.ajax({
+          headers:{
+            'csrf-token': $('meta[name="ct"]').attr('content')
+          },
+          type: 'POST',
+          data: {
+            recaptcha: recaptcha,
+            text: data,
+            language: language
+          },
+          url: '/api/profile',
+          dataType: 'json',
+          success: function(response) {
+            $loading.hide();
 
-      },
-      error: function(xhr) {
-        $loading.hide();
+            if (response.error) {
+              showError(response.error);
+            } else {
+              $results.show();
+              showTraits(response);
+              showTextSummary(response);
+              showVizualization(response);
+            }
+          },
+          error: function(xhr) {
+            $loading.hide();
 
-        var error;
-        try {
-          error = JSON.parse(xhr.responseText || {});
-        } catch(e) {}
+            var error;
+            try {
+              error = JSON.parse(xhr.responseText || {});
+            } catch(e) {}
 
-        if (xhr && xhr.status === 429){
-          $captcha.css('display','table');
-          $('.errorMsg').css('color','black');
-          error.error = 'Complete the captcha to proceed';
-        } else {
-          $('.errorMsg').css('color','red');
-        }
+            if (xhr && xhr.status === 429){
+              $captcha.css('display','table');
+              $('.errorMsg').css('color','black');
+              error.error = 'Complete the captcha to proceed';
+            } else {
+              $('.errorMsg').css('color','red');
+            }
 
-        showError(error ? (error.error || error): '');
-      }
+            showError(error ? (error.error || error): '');
+          }
+        });
     });
   });
 

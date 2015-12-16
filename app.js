@@ -34,26 +34,27 @@ function initDBConnection() {
 			console.error("Error: ", err);
 			return;
 		}
-			
+
 		var createTableStatement = 'CREATE TABLE "TWITTER_DB" (' +
-				'"MESSAGE_ID" VARCHAR(256), ' +
+				'"MESSAGE_ID" VARCHAR(256) NOT NULL, ' +
 				'"MESSAGE_BODY" VARCHAR(1024), ' +
 				'"MESSAGE_FAVORITES_COUNT" BIGINT, ' +
 				'"MESSAGE_POSTED_TIME" VARCHAR(32), ' +
-				'"MESSAGE_TYPE" VARCHAR(8), ' +
+				'"MESSAGE_TYPE" VARCHAR(16), ' +
 				'"SENTIMENT" VARCHAR(16), ' +
 				'"AUTHOR_CITY" VARCHAR(64), ' +
 				'"AUTHOR_STATE" VARCHAR(64), ' +
 				'"AUTHOR_COUNTRY" VARCHAR(64), ' +
-				'"AUTHOR_GENDER" VARCHAR(8), ' +
-				'"AUTHOR_IS_MARRIED" VARCHAR(8), ' +
-				'"AUTHOR_IS_PARENT" VARCHAR(8), ' +
+				'"AUTHOR_GENDER" VARCHAR(16), ' +
+				'"AUTHOR_IS_MARRIED" VARCHAR(16), ' +
+				'"AUTHOR_IS_PARENT" VARCHAR(16), ' +
 				'"AUTHOR_PREFERRED_USERNAME" VARCHAR(128), ' +
 				'"AUTHOR_DISPLAY_NAME" VARCHAR(64), ' +
 				'"AUTHOR_FOLLOWER_COUNT" BIGINT, ' +
 				'"AUTHOR_FRIEND_COUNT" BIGINT, ' +
 				'"AUTHOR_ID" VARCHAR(128), ' +
-				'"AUTHOR_LISTED_COUNT" BIGINT);';
+				'"AUTHOR_LISTED_COUNT" BIGINT, ' +
+				'PRIMARY KEY (MESSAGE_ID));';
 			
 		console.log("attempting to create table...");
 		console.log("create table statement: " + createTableStatement);
@@ -71,7 +72,7 @@ function initDBConnection() {
 				else result.closeSync();
 
 				//Close the connection
-				conn.close(function(err) {
+				conn.closeSync(function(err) {
 					if(err) console.log("Problem disconnecting from dashDB");
 					else console.log("Connection closed successfully.");
 				});
@@ -101,7 +102,7 @@ function queryDB(query, result) {
 					for(var i in rowText) {
 						text += rowText[i].MSGBODY + "\n\n";
 					}
-					conn.close(function(err) {
+					conn.closeSync(function(err) {
 						if(err) console.log("Problem disconnecting from dashDB");
 						else console.log("Connection closed successfully.");
 					});
@@ -115,11 +116,86 @@ function queryDB(query, result) {
 }
 
 function insertTweetIntoDB(data) {
-	console.log("attempting to insert " + data + " into dashDB");
+	//console.log("attempting to insert " + data + " into dashDB");
 	
 	var tweet = JSON.parse(data);
 	
-	console.log(tweet);
+	// unfortunately javascript parses json strangely, so we need to break down the data
+	var messageId = 'unknown',
+			messageBody = 'unknown',
+			messagePostedTime = 'unknown',
+			messageType = 'unknown',
+			messageSentiment = 'unknown',
+			authorCity = 'unknown',
+			authorState = 'unknown',
+			authorCountry = 'unknown',
+			authorGender = 'unknown',
+			authorIsMarried = 'unknown',
+			authorIsParent = 'unknown',
+			authorPreferredUsername = 'unknown',
+			authorDisplayName, authorId = 'unknown';
+
+	var messageFavoritesCount = 0,
+			authorFollowerCount = 0,
+			authorFriendCount = 0,
+			authorListedCount = 0;
+
+	if(tweet.message) {
+		var message = JSON.parse(JSON.stringify(tweet.message));
+		if(message.id) messageId = message.id;
+		if(message.body) {
+			var pattern = "'", re = new RegExp(pattern, "g");
+			messageBody = message.body.replace(re, "''");
+		}
+		if(message.postedTime) {
+			messagePostedTime = message.postedTime.substring(0, 10) + ' ' + message.postedTime.substring(11,19);
+		}
+		if(message.verb) messageType = message.verb;
+		if(message.favoritesCount) messageFavoritesCount = message.favoritesCount;
+		if(message.actor) {
+			var actor = JSON.parse(JSON.stringify(message.actor));
+			if(actor.preferredUsername) authorPreferredUsername = actor.preferredUsername;
+			if(actor.displayName) authorDisplayName = actor.displayName;
+			if(actor.followersCount) authorFollowerCount = actor.followersCount;
+			if(actor.friendsCount) authorFriendCount = actor.friendsCount;
+			if(actor.id) authorId = actor.id;
+			if(actor.listedCount) authorListedCount = actor.listedCount;
+		}
+	}
+	if(tweet.cde) {
+		var cde = JSON.parse(JSON.stringify(tweet.cde));
+		if(cde.content) {
+			var content = JSON.parse(JSON.stringify(cde.content));
+			if(content.sentiment) {
+				var sentiment = JSON.parse(JSON.stringify(content.sentiment));
+				if(sentiment.polarity) {
+					messageSentiment = sentiment.polarity;
+				}
+			}
+		}
+		if(cde.author) {
+			var author = JSON.parse(JSON.stringify(cde.author));
+			if(author.gender) authorGender = author.gender;
+			if(author.maritalStatus) {
+				if(author.maritalStatus.isMarried) authorIsMarried = author.maritalStatus.isMarried;
+			}
+			if(author.parenthood) {
+				if(author.parenthood.isParent) authorIsParent = author.parenthood.isParent;
+			}
+			if(author.location) {
+				var location = JSON.parse(JSON.stringify(author.location));
+				if(location.city) authorCity = location.city;
+				if(location.state) authorState = location.state;
+				if(location.country) authorCountry = location.country;
+			}
+		}
+	}
+	
+	if(messageBody === 'unkwown' || messageId === 'unknown') {
+		console.log("Unable to extract sufficient information from tweet");
+		console.log("tweet data: " + data);
+		return;
+	}
 	
 	db.open(dashDBcredentials.dsn, function(err, conn) {
 		if(err) {
@@ -127,40 +203,30 @@ function insertTweetIntoDB(data) {
 			console.error("Error: ", err);
 			return;
 		}
-		
-		// unfortunately javascript parses json strangely, so we need to break down the data
-		var message = JSON.parse(JSON.stringify(tweet.message));
-		var content = JSON.parse(JSON.stringify(tweet.cde.content));
-		var sentiment = JSON.parse(JSON.stringify(content.sentiment));
-		var author = JSON.parse(JSON.stringify(tweet.cde.author));
-		var location = JSON.parse(JSON.stringify(author.location));
-		var actor = JSON.parse(JSON.stringify(message.actor));
-		
-		// may want to query based on message_id to not add duplicates
-		
+
 		var insertStatement = "INSERT INTO TWITTER_DB VALUES ('" +
-				message.id + "', '" +
-				message.body + "', " +
-				message.favoritesCount + ", '" +
-				message.postedTime + "', '" +
-				message.verb + "', '" +
-				sentiment.polarity + "', '" +
-				location.city + "', '" +
-				location.state + "', '" +
-				location.country + "', '" +
-				author.gender + "', '" +
-				author.maritalStatus.isMarried + "', '" +
-				author.parenthood.isParent + "', '" +
-				actor.preferredUsername + "', '" +
-				actor.displayName + "', " +
-				actor.followersCount + ", " +
-				actor.friendsCount + ", '" +
-				actor.id + "', " +
-				actor.listedCount + ");";
-			
+				messageId + "', '" +
+				messageBody + "', " +
+				messageFavoritesCount + ", '" +
+				messagePostedTime + "', '" +
+				messageType + "', '" +
+				messageSentiment + "', '" +
+				authorCity + "', '" +
+				authorState + "', '" +
+				authorCountry + "', '" +
+				authorGender + "', '" +
+				authorIsMarried + "', '" +
+				authorIsParent + "', '" +
+				authorPreferredUsername + "', '" +
+				authorDisplayName + "', " +
+				authorFollowerCount + ", " +
+				authorFriendCount + ", '" +
+				authorId + "', '" +
+				authorListedCount + "');";
+
 		console.log("attempting to insert data...");
 		console.log("insert statement: " + insertStatement);
-			
+
 		conn.prepare(insertStatement, function (err, stmt) {
 			if (err) {
 				//could not prepare for some reason
@@ -174,7 +240,7 @@ function insertTweetIntoDB(data) {
 				else result.closeSync();
 
 				//Close the connection
-				conn.close(function(err) {
+				conn.closeSync(function(err) {
 					if(err) console.log("Problem disconnecting from dashDB");
 					else console.log("Connection closed successfully.");
 				});
@@ -233,6 +299,11 @@ var appEnv = cfenv.getAppEnv(appEnvOpts);
 var twitterCreds = appEnv.getServiceCreds("social-media-test-twitter");
 var twitter = require('./lib/twitter.js')(twitterCreds.url);
 
+// limit to the first 20 tweets
+var numTweets = 5;// default is 100, max is 500
+var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
+
+
 app.get("/api/1/messages/count", function (req, res) {
   console.log("Counting with", req.query.q);
   twitter.count(req.query.q, function (error, body) {
@@ -248,9 +319,6 @@ app.get("/api/1/messages/count", function (req, res) {
 
 app.get("/api/1/messages/search", function (req, res) {
   console.log("Searching with", req.query.q);
-  // limit to the first 20 tweets
-  var numTweets = 20;// default is 100, max is 500
-  var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
   twitter.search(req.query.q, numTweets, tweetIndex, function (error, body) {
     if (error) {
       res.sendStatus(500);
@@ -260,11 +328,11 @@ app.get("/api/1/messages/search", function (req, res) {
 //    var jsonStuff = JSON.parse(body);
 //    console.log("parsed successfully");
 //    console.log(jsonStuff.tweets);
-	console.log(JSON.stringify(body));
+//	console.log(JSON.stringify(body));
 	var tweets = JSON.parse(JSON.stringify(body.tweets));
 	for(var i in tweets) {
 		 //console.log(tweets[i]);
-		 console.log("attempting to insert into DB...");
+		 //console.log("attempting to insert into DB...");
 		 //console.log(JSON.stringify(tweets[i]));
 		 insertTweetIntoDB(JSON.stringify(tweets[i]));
 	}
@@ -295,9 +363,6 @@ app.get("/api/1/tracks/:id/messages/count", function (req, res) {
 
 app.get("/api/1/tracks/:id/messages/search", function (req, res) {
   console.log("Searching track", req.params.id, "with", req.query.q);
-  // limit to the first 20 tweets
-  var numTweets = 20;// default is 100, max is 500
-  var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
   twitter.searchTrack(req.params.id, req.query.q, numTweets, tweetIndex, function (error, body) {
     if (error) {
       res.sendStatus(500);
@@ -332,7 +397,7 @@ app.get("/select", function(req, res) {
 						text += rowText[i].MSGBODY + "\n\n";
 					}
 					res.send(text);
-					conn.close(function() {
+					conn.closeSync(function() {
 						console.log("Connection closed successfully.");
 					});
 				}
@@ -363,7 +428,7 @@ app.post('/api/select', function(req, res) {
 					}
 					console.log("query result: " + text);
 					res.send(text);
-					conn.close(function() {
+					conn.closeSync(function() {
 						console.log("Connection closed successfully.");
 					});
 				}

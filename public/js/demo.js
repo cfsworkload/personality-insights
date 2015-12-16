@@ -91,7 +91,7 @@ $(document).ready(function() {
     $results.hide();
 
 
-    $.post("/api/select",
+    $.post("/api/db/tweets",
     {
         name: $content.val()
     }, function(data) {

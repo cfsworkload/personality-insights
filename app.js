@@ -22,12 +22,12 @@ function initDBConnection() {
 			console.log("dashDB dsn: " + dashDBcredentials.dsn);
 		}
 	}
-    else {
-    	console.log("Unable to find dashDB credentials");
-    }
+	else {
+		console.log("Unable to find dashDB credentials");
+	}
 
 	db = require('ibm_db');
-	
+
 	db.open(dashDBcredentials.dsn, function(err,conn) {
 		if(err) {
 			console.log("Unable to connect to dashDB");
@@ -41,7 +41,7 @@ function initDBConnection() {
 				'"MESSAGE_FAVORITES_COUNT" BIGINT, ' +
 				'"MESSAGE_POSTED_TIME" VARCHAR(32), ' +
 				'"MESSAGE_TYPE" VARCHAR(16), ' +
-				'"SENTIMENT" VARCHAR(16), ' +
+				'"MESSAGE_SENTIMENT" VARCHAR(16), ' +
 				'"AUTHOR_CITY" VARCHAR(64), ' +
 				'"AUTHOR_STATE" VARCHAR(64), ' +
 				'"AUTHOR_COUNTRY" VARCHAR(64), ' +
@@ -55,10 +55,10 @@ function initDBConnection() {
 				'"AUTHOR_ID" VARCHAR(128), ' +
 				'"AUTHOR_LISTED_COUNT" BIGINT, ' +
 				'PRIMARY KEY (MESSAGE_ID));';
-			
+
 		console.log("attempting to create table...");
 		console.log("create table statement: " + createTableStatement);
-			
+
 		conn.prepare(createTableStatement, function (err, stmt) {
 			if (err) {
 				//could not prepare for some reason
@@ -83,63 +83,31 @@ function initDBConnection() {
 
 initDBConnection();
 
-function queryDB(query, result) {
-	console.log("attempting to query dashDB with " + query);
-	db.open(dashDBcredentials.dsn, function(err, conn) {
-		if(err) {
-			console.log("Unable to connect to dashDB");
-			console.error("Error: ", err);
-			return;
-		} else {
-			conn.query(query, function(err, rows) {
-				if(err) {
-					console.log("Unable to query dashDB");
-					console.error("Error: ", err);
-					return;
-				} else {
-					var rowText = JSON.parse(JSON.stringify(rows));
-					var text = "";
-					for(var i in rowText) {
-						text += rowText[i].MSGBODY + "\n\n";
-					}
-					conn.closeSync(function(err) {
-						if(err) console.log("Problem disconnecting from dashDB");
-						else console.log("Connection closed successfully.");
-					});
-					
-					console.log("queryDB text: " + text);
-					result(text);
-				}
-			});
-		}
-	});
-}
-
 function insertTweetIntoDB(data) {
-	//console.log("attempting to insert " + data + " into dashDB");
-	
 	var tweet = JSON.parse(data);
-	
-	// unfortunately javascript parses json strangely, so we need to break down the data
-	var messageId = 'unknown',
-			messageBody = 'unknown',
-			messagePostedTime = 'unknown',
-			messageType = 'unknown',
-			messageSentiment = 'unknown',
-			authorCity = 'unknown',
-			authorState = 'unknown',
-			authorCountry = 'unknown',
-			authorGender = 'unknown',
-			authorIsMarried = 'unknown',
-			authorIsParent = 'unknown',
-			authorPreferredUsername = 'unknown',
-			authorDisplayName, authorId = 'unknown';
 
-	var messageFavoritesCount = 0,
-			authorFollowerCount = 0,
-			authorFriendCount = 0,
-			authorListedCount = 0;
+	// initialize default values
+	var defaultText = 'undefined';
+	var defaultInt = 0;
+	var messageId = defaultText,
+		messageBody = defaultText,
+		messagePostedTime = defaultText,
+		messageType = defaultText,
+		messageSentiment = defaultText,
+		authorCity = defaultText,
+		authorState = defaultText,
+		authorCountry = defaultText,
+		authorGender = defaultText,
+		authorIsMarried = defaultText,
+		authorIsParent = defaultText,
+		authorPreferredUsername = defaultText,
+		authorDisplayName, authorId = defaultText;
+	var messageFavoritesCount = defaultInt,
+		authorFollowerCount = defaultInt,
+		authorFriendCount = defaultInt,
+		authorListedCount = defaultInt;
 
+	// it's possible that the JSON won't contain some objects, so we need to check first
 	if(tweet.message) {
 		var message = JSON.parse(JSON.stringify(tweet.message));
 		if(message.id) messageId = message.id;
@@ -190,13 +158,14 @@ function insertTweetIntoDB(data) {
 			}
 		}
 	}
-	
-	if(messageBody === 'unkwown' || messageId === 'unknown') {
+
+	// check to see if we have the most basic information
+	if(messageBody === defaultText || messageId === defaultText) {
 		console.log("Unable to extract sufficient information from tweet");
 		console.log("tweet data: " + data);
 		return;
 	}
-	
+
 	db.open(dashDBcredentials.dsn, function(err, conn) {
 		if(err) {
 			console.log("Unable to connect to dashDB");
@@ -279,10 +248,13 @@ initPersonalityInsights();
 //require('./config/i18n')(app);
 
 //---Deployment Tracker---------------------------------------------------------
+
 require("cf-deployment-tracker-client").track();
 
+//---Twitter Service Initialization--------------------------------------------
+
 // load local VCAP configuration
-var vcapLocal = null
+var vcapLocal = null;
 try {
   vcapLocal = require("./vcap-local.json");
   console.log("Loaded local VCAP", vcapLocal);
@@ -303,8 +275,41 @@ var twitter = require('./lib/twitter.js')(twitterCreds.url);
 var numTweets = 5;// default is 100, max is 500
 var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
 
+//---App----------------------------------------------------------------------
 
-app.get("/api/1/messages/count", function (req, res) {
+// add sample data
+// be careful with this! each call will return 6000 tweets, which is 0.12% of the free allowance
+// this may also overwhelm the server and/or the database?
+app.get("/api/twitter/sample", function (req, res) {
+	//var sampleTweets = "";
+	var twitterProfiles = ['BarackObama', 'realDonaldTrump', 'BernieSanders', 'HillaryClinton',
+			'marcorubio', 'officialjaden', 'katyperry', 'justinbieber', 'taylorswift13',
+			'KingJames', 'BillGates', 'Oprah'];
+	var maxTweets = 500;
+
+	for(var j in twitterProfiles) {
+		var query = "from:" + twitterProfiles[j];
+		console.log("Searching with", query);
+		twitter.search(query, maxTweets, tweetIndex, function (error, body) {
+			if (error) {
+				res.sendStatus(500);
+			}
+
+			var tweets = JSON.parse(JSON.stringify(body.tweets));
+			for(var i in tweets) {
+				insertTweetIntoDB(JSON.stringify(tweets[i]));
+			}
+
+			//sampleTweets += body;
+		});
+	}
+
+	//res.send('sampleTweets');
+	res.send('success!');
+});
+
+// decahose count
+app.get("/api/twitter/messages/count", function (req, res) {
   console.log("Counting with", req.query.q);
   twitter.count(req.query.q, function (error, body) {
     if (error) {
@@ -317,103 +322,70 @@ app.get("/api/1/messages/count", function (req, res) {
   });
 });
 
-app.get("/api/1/messages/search", function (req, res) {
-  console.log("Searching with", req.query.q);
-  twitter.search(req.query.q, numTweets, tweetIndex, function (error, body) {
-    if (error) {
-      res.sendStatus(500);
-    }
-    
-//    console.log(body);
-//    var jsonStuff = JSON.parse(body);
-//    console.log("parsed successfully");
-//    console.log(jsonStuff.tweets);
-//	console.log(JSON.stringify(body));
-	var tweets = JSON.parse(JSON.stringify(body.tweets));
-	for(var i in tweets) {
-		 //console.log(tweets[i]);
-		 //console.log("attempting to insert into DB...");
-		 //console.log(JSON.stringify(tweets[i]));
-		 insertTweetIntoDB(JSON.stringify(tweets[i]));
-	}
-    
-    res.send(body);
-  });
-});
-
-app.get("/api/1/tracks", function (req, res) {
-  console.log("Retrieving tracks");
-  twitter.getTracks(function (error, body) {
-    if (error) {
-      res.sendStatus(500);
-    }
-    res.send(body);
-  });
-});
-
-app.get("/api/1/tracks/:id/messages/count", function (req, res) {
-  console.log("Counting track", req.params.id, "with", req.query.q);
-  twitter.countTrack(req.params.id, req.query.q, function (error, body) {
-    if (error) {
-      res.sendStatus(500);
-    }
-    res.send(body);
-  });
-});
-
-app.get("/api/1/tracks/:id/messages/search", function (req, res) {
-  console.log("Searching track", req.params.id, "with", req.query.q);
-  twitter.searchTrack(req.params.id, req.query.q, numTweets, tweetIndex, function (error, body) {
-    if (error) {
-      res.sendStatus(500);
-    }
-    res.send(body);
-  });
-});
-
-/*app.get("specialSelect", function(req, res) {
-	var result;
-	queryDB("SELECT MSG_BODY FROM TWITTER_DB WHERE USER_PREFERRED_USERNAME = 'BarackObama'", result);
-	res.send(result);
-});
-
-app.get("/select", function(req, res) {
-	db.open(dashDBcredentials.dsn, function(err, conn) {
-		if(err) {
-			console.log("Unable to connect to dashDB");
-			console.error("Error: ", err);
-			return;
-		} else {
-			var query = "SELECT MSG_BODY FROM TWITTER_DB WHERE USER_PREFERRED_USERNAME = 'BarackObama'";
-			conn.query(query, function(err, rows) {
-				if(err) {
-					console.log("Unable to query dashDB");
-					console.error("Error: ", err);
-					return;
-				} else {
-					var rowText = JSON.parse(JSON.stringify(rows));
-					var text = "";
-					for(var i in rowText) {
-						text += rowText[i].MSGBODY + "\n\n";
-					}
-					res.send(text);
-					conn.closeSync(function() {
-						console.log("Connection closed successfully.");
-					});
-				}
-			});
+// decahose search
+app.get("/api/twitter/messages/search", function (req, res) {
+	console.log("Searching with", req.query.q);
+	twitter.search(req.query.q, numTweets, tweetIndex, function (error, body) {
+		if (error) {
+			res.sendStatus(500);
 		}
-	});
-});*/
 
-app.post('/api/select', function(req, res) {
+		var tweets = JSON.parse(JSON.stringify(body.tweets));
+		for(var i in tweets) {
+			insertTweetIntoDB(JSON.stringify(tweets[i]));
+		}
+
+		res.send(body);
+	});
+});
+
+// tracks
+app.get("/api/twitter/tracks", function (req, res) {
+	console.log("Retrieving tracks");
+	twitter.getTracks(function (error, body) {
+		if (error) {
+			res.sendStatus(500);
+		}
+		res.send(body);
+	});
+});
+
+// powertrack count
+app.get("/api/twitter/tracks/:id/messages/count", function (req, res) {
+	console.log("Counting track", req.params.id, "with", req.query.q);
+	twitter.countTrack(req.params.id, req.query.q, function (error, body) {
+		if (error) {
+			res.sendStatus(500);
+		}
+		res.send(body);
+	});
+});
+
+// powertrack search
+app.get("/api/twitter/tracks/:id/messages/search", function (req, res) {
+	console.log("Searching track", req.params.id, "with", req.query.q);
+	twitter.searchTrack(req.params.id, req.query.q, numTweets, tweetIndex, function (error, body) {
+		if (error) {
+			res.sendStatus(500);
+		}
+		
+		var tweets = JSON.parse(JSON.stringify(body.tweets));
+		for(var i in tweets) {
+			insertTweetIntoDB(JSON.stringify(tweets[i]));
+		}
+		
+		res.send(body);
+	});
+});
+
+app.post('/api/db/tweets', function(req, res) {
 	db.open(dashDBcredentials.dsn, function(err, conn) {
 		if(err) {
 			console.log("Unable to connect to dashDB");
 			console.error("Error: ", err);
 			return;
 		} else {
-			var query = "SELECT MESSAGE_BODY FROM TWITTER_DB WHERE AUTHOR_PREFERRED_USERNAME = '" + req.body.name + "'";
+			var query = "SELECT MESSAGE_BODY FROM TWITTER_DB WHERE AUTHOR_PREFERRED_USERNAME = '" + req.body.name + "';";
 			console.log("query statement: " + query);
 			conn.query(query, function(err, rows) {
 				if(err) {
@@ -437,17 +409,49 @@ app.post('/api/select', function(req, res) {
 	});
 });
 
+app.get('/api/db/authors', function(req, res) {
+	db.open(dashDBcredentials.dsn, function(err, conn) {
+		if(err) {
+			console.log("Unable to connect to dashDB");
+			console.error("Error: ", err);
+			return;
+		} else {
+			var query = "SELECT AUTHOR_PREFERRED_USERNAME FROM TWITTER_DB;";
+			console.log("query statement: " + query);
+			conn.query(query, function(err, rows) {
+				if(err) {
+					console.log("Unable to query dashDB");
+					console.error("Error: ", err);
+					return;
+				} else {
+					var rowText = JSON.parse(JSON.stringify(rows));
+					var text = {};
+					text.authors = [];
+					for(var i in rowText) {
+						text.authors.push(rowText[i]);
+					}
+					console.log("query result: " + text);
+					res.send(text);
+					conn.closeSync(function() {
+						console.log("Connection closed successfully.");
+					});
+				}
+			});
+		}
+	});
+});
+
 app.post('/api/profile', function(req, res, next) {
-  //var parameters = extend(req.body, { acceptLanguage : i18n.lng() });
+	//var parameters = extend(req.body, { acceptLanguage : i18n.lng() });
 
-  console.log("finding personality insights...");
+	console.log("finding personality insights...");
 
-  personalityInsights.profile(req.body, function(err, profile) {
-    if (err)
-      return next(err);
-    else
-      return res.json(profile);
-  });
+	personalityInsights.profile(req.body, function(err, profile) {
+		if (err)
+			return next(err);
+		else
+			return res.json(profile);
+	});
 });
 
 // serve the files out of ./public as our main files
@@ -455,8 +459,8 @@ app.use(express.static(__dirname + '/public'));
 
 // start server on the specified port and binding host
 app.listen(appEnv.port, "0.0.0.0", function () {
-  // print a message when the server starts listening
-  console.log("server starting on " + appEnv.url);
+	// print a message when the server starts listening
+	console.log("server starting on " + appEnv.url);
 });
 
 //------------------------------------------------------------------------------

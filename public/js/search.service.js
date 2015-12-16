@@ -21,9 +21,9 @@
         
         var prefix;
         if (trackToQueryFrom == "Decahose" || trackToQueryFrom == null) {
-          prefix = "/api/1"
+          prefix = "/api/twitter";
         } else {
-          prefix = "/api/1/tracks/" + trackToQueryFrom
+          prefix = "/api/twitter/tracks/" + trackToQueryFrom;
         }
         var method = countOnly ? "count" : "search";
         $http.get(prefix + "/messages/" + method + "?q=" + encodeURIComponent(queryString)).success(function (data) {
@@ -35,7 +35,7 @@
       },
       getTracks: function () {
         var deferred = $q.defer();
-        $http.get("/api/1/tracks").success(function (data) {
+        $http.get("/api/twitter/tracks").success(function (data) {
           deferred.resolve(data);
         }).error(function () {
           deferred.reject();

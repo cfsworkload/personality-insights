@@ -272,7 +272,7 @@ var twitterCreds = appEnv.getServiceCreds("social-media-test-twitter");
 var twitter = require('./lib/twitter.js')(twitterCreds.url);
 
 // limit to the first 20 tweets
-var numTweets = 5;// default is 100, max is 500
+var numTweets = 20;// default is 100, max is 500
 var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
 
 //---App----------------------------------------------------------------------
@@ -297,7 +297,9 @@ app.get("/api/twitter/sample", function (req, res) {
 
 			var tweets = JSON.parse(JSON.stringify(body.tweets));
 			for(var i in tweets) {
-				insertTweetIntoDB(JSON.stringify(tweets[i]));
+				setTimeout(function() {
+					insertTweetIntoDB(JSON.stringify(tweets[i]));
+				}, 500 * i);
 			}
 
 			//sampleTweets += body;

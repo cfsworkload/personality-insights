@@ -111,7 +111,7 @@
 })();
 
 // Default query when none specified
-var defaultQuery = {
+/*var defaultQuery = {
   "condition": "AND",
   "rules": [{
     "id": "keyword",
@@ -144,6 +144,27 @@ var defaultQuery = {
     "input": "text",
     "operator": "greater_or_equal",
     "value": "2015-07-01",
+    "data": {}
+  }]
+};*/
+
+var defaultQuery = {
+  "condition": "AND",
+  "rules": [{
+    "id": "from",
+    "field": "from",
+    "type": "string",
+    "input": "text",
+    "operator": "equal",
+    "value": "BarackObama",
+    "data": {}
+  }, {
+    "id": "posted",
+    "field": "posted",
+    "type": "date",
+    "input": "text",
+    "operator": "greater_or_equal",
+    "value": "2015-12-01",
     "data": {}
   }]
 };

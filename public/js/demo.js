@@ -75,35 +75,36 @@ $(document).ready(function() {
     $('.analysis-btn').blur();
 
     // check if the captcha is active and the user complete it
-    var recaptcha = grecaptcha.getResponse();
+    /*var recaptcha = grecaptcha.getResponse();
 
     // reset the captcha
     grecaptcha.reset();
 
     if ($captcha.css('display') === 'table' && recaptcha === '')
-      return;
+      return;*/
 
 
-    $loading.show();
+    /*$loading.show();
     $captcha.hide();
     $error.hide();
     $traits.hide();
-    $results.hide();
+    $results.hide();*/
 
 
     $.post("/api/db/tweets",
     {
         name: $content.val()
     }, function(data) {
+    	console.log("got data from DB");
         $.ajax({
           headers:{
             'csrf-token': $('meta[name="ct"]').attr('content')
           },
           type: 'POST',
           data: {
-            recaptcha: recaptcha,
+            /*recaptcha: recaptcha,*/
             text: data,
-            language: language
+            language: 'en'
           },
           url: '/api/profile',
           dataType: 'json',
@@ -378,10 +379,10 @@ function showVizualization(theProfile) {
     var isEnglish = $('#english_radio').is(':checked');
     language = isEnglish ? 'en' : 'es';
 
-    $.get('/text/' + language + '.txt').done(function(text) {
+    /*$.get('/text/' + language + '.txt').done(function(text) {
       $content.val(text);
       updateWordsCount();
-    });
+    });/*/
   }
 
   onSampleTextChange();

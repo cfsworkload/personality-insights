@@ -1,100 +1,115 @@
 <!DOCTYPE html>
-<html lang="en-US">
+
+<html ng-app="app" lang="en">
 
 <head>
-  <title>Personality Insights</title>
+  <title>Sentiment Analysis</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="ct" content="<%= ct %>">
-  <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
-  <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/css/watson-bootstrap-dark.css">
-  <link rel="stylesheet" href="/css/banner.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <meta name="google" content="notranslate" />
+
+  <link rel="icon" type="image/x-icon" href="https://hub.jazz.net/manage/web/com.ibm.team.jazzhub.web/graphics/common/favicon.ico?v=2"> 
+
+  <link rel="stylesheet" href="vendor/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/jQuery-QueryBuilder/dist/css/query-builder.default.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css">
+  <link rel="stylesheet" href="vendor/google-code-prettify/bin/prettify.min.css">
+  <link rel="stylesheet" href="vendor/angular-ui-notification/dist/angular-ui-notification.min.css">
+
+  <link rel="stylesheet" href="css/index.css">
+
   <script type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script>
 </head>
 
-<body>
-  <div class="row service-container">
-    <div class="col-lg-12 service-header">
-      <div class="row top-nav navbar-fixed-top">
-        <div class="container">
-          <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/" class="top-nav--logo-link">
-            <h3 class="heading left">IBM
-              <span class="top-nav--logo-wdc">Watson Developer Cloud</span>
-            </h3>
-          </a>
-          <nav class="top-nav--nav">
-            <li class="top-nav--nav-item"><a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/services-catalog.html">Services</a></li>
-            <li class="top-nav--nav-item"><a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/">Docs</a></li>
-            <li class="top-nav--nav-item"><a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/gallery.html">App Gallery</a></li>
-            <li class="top-nav--nav-item"><a href="http://developer.ibm.com/watson/">Community</a></li>
-          </nav>
-        </div>
-      </div>
-      <div class="row header">
-        <div class="container">
-          <div class="avatar img-container col-lg-2 col-md-2 col-sm-2 hidden-xs">
-            <img src="/images/app.png" class="service-icon">
-          </div>
-          <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 dialog-description">
-            <h1 style="font-size:50px;" class="service-title">Personality Insights</h1>
-            <p>The IBM Watson Personality Insights service uses linguistic analytics to extract a spectrum of cognitive and social characteristics from the text data that a person generates through blogs, tweets, forum posts, and more.</p>
-            <div class="resource">
-              <img src="/images/link.svg" class="link-icon">
-              <strong>Resources:</strong>
-            </div>
-            <div class="resource-item-container"><a href="https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/personality-insights/api" class="resource-item">API Reference</a><a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/personality-insights/"
-              class="resource-item">Documentation</a><a href="https://github.com/watson-developer-cloud/personality-insights-nodejs" class="resource-item">Fork on Github</a><a href="http://bluemix.net/deploy?repository=https://github.com/watson-developer-cloud/personality-insights-nodejs.git"
-              class="resource-item">Fork and Deploy on Bluemix</a></div>
-          </div>
-        </div>
-      </div>
+<body ng-controller="SearchController as controller" ng-cloak>
+  <spinner name="spinner" usSpinner>
+    <div class="overlay"></div>
+    <div class="spinner">
+      <div class="double-bounce1"></div>
+      <div class="double-bounce2"></div>
+    </div>
+    <div class="please-wait">Searching...</div>
+  </spinner>
+
+  <div class="navbar">
+    <div class="nb-left-area">
+      <a class="nb-button-link top_home clickable">
+        <img class="nb-bluemix-logo" src="images/bluemix-logo.png">
+      </a>
+      <a class="nb-button-link top_home" >
+        <span class="nb-devopsservices-text">IBM <b>Architecture Center</b></span>
+      </a>
     </div>
   </div>
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-6 col-md-12 col-xs-12">
-        <h2>Input Text</h2>
-        <p>We need a minimum of 3500 words and ideally 6000 words or more to compute statistically significant results. See <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/personality-insights/science.shtml">the science behind the service</a>.</p>
-        <p>Ideally, the text should contain words we use in every day life relating to personal experiences, thoughts and responses. See <a href="http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/personality-insights/guidance.shtml#optimal">usage guidance</a>          for details.</p>
-        <div class="well">
-          <div class="form-group row">
-            <div style="padding:0px;" class="col-lg-12 col-xs-12">
-              <label class="col-lg-6 col-md-6 col-xs-6 control-label">Choose Language:</label>
-              <div class="col-lg-6 col-md-6 col-xs-6 sample-radio-list">
-                <div class="sample-radio-container">
-                  <label>
-                    <input id="english_radio" type="radio" name="sample_text" value="en" checked class="sample-radio">
-                    <span>English</span>
-                  </label>
-                </div>
-                <div class="sample-radio-container">
-                  <label>
-                    <input type="radio" name="sample_text" value="es" class="sample-radio">
-                    <span>Spanish</span>
-                  </label>
-                </div>
-              </div>
-              <textarea rows="12" required="true" name="text" placeholder="Please enter English text to analyze (minimum of 100 words)..." class="content form-control"></textarea>
-              <div class="text-right wordsCountFootnote">
-                <span class="wordsCount small"></span>
-                <span class="small"> words</span>
-              </div>
-            </div>
-          </div>
-          <div class="form-group row buttons-container">
-            <div class="col-lg-4 col-xs-4">
-              <button type="button" class="btn btn-block clear-btn">Clear</button>
-            </div>
-            <div class="col-lg-4 col-lg-push-4 col-xs-4 col-xs-push-4">
-              <button type="button" class="btn btn-block analysis-btn">Analyze</button>
-            </div>
-          </div>
-        </div>
+  <div class="container-fluid main-container">
+    <div class="container query">
+      <h2>Sentiment Analysis</h2>
+      <h3>Build Query</h3>
+      <div id="query-builder"></div>
+      <div class="twitter-buttons">
+        <button type="button" class="btn btn-full btn-twitter" ng-click="controller.search(true)">Twitter Count</button>
+        <button type="button" class="btn btn-full btn-twitter" ng-click="controller.search(false)">Twitter Search</button>
       </div>
-      <div class="col-lg-6 col-md-12 col-xs-12">
+    </div>
+    <div class="container main-results">
+      <div class="col-xs-6 results-tweets">
+        <h2>View Results</h2>
+        <ul class="nav nav-pills" role="tablist">
+            <li class="active">
+              <a href="#tab-results" data-toggle="tab">
+                <b>{{controller.data.results.search.results | numeraljs:'0,0'}}</b> tweets</a>
+            </li>
+            <li><a href="#tab-results-raw" data-toggle="tab">Source</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab-results">
+              <h5>This is the query string as it was sent to the Insights for Twitter service:</h5>
+              <div id="query-fulltext">
+                <div class="form-group">
+                  <input class="form-control" type="text" ng-model="controller.data.query" readonly>
+                </div>
+              </div>
+
+              <small ng-if="controller.data.results.tweets.length > 0">Note: this search interface only returns the first {{controller.data.results.tweets.length}} tweets.</small>
+              <ul class="list-group">
+                <a href="#tab-selected-tweet" class="list-group-item" ng-repeat="tweet in controller.data.results.tweets">
+                  <div class="media tweet" ng-click="controller.select(tweet)">
+                    <div class="media-left">
+                      <img class="tweet-image media-object" ng-src="{{tweet.message.actor.image}}" />
+                    </div>
+                    <div class="media-body">
+                      <div>
+                        <span class="tweet-displayName">{{tweet.message.actor.displayName}}</span>
+                        <span class="tweet-handle text-muted">@{{tweet.message.actor.preferredUsername}}</span>
+                        <i class="fa fa-picture-o" ng-if="tweet.message.twitter_entities.media.length > 0"></i>
+                        <i class="fa fa-{{tweet.cde.author.gender}}" ng-if="tweet.cde.author.gender != 'unknown'"></i>
+                        <i class="fa fa-diamond" ng-if="tweet.cde.author.maritalStatus.isMarried == 'true'"></i>
+                        <i class="fa fa-child" ng-if="tweet.cde.author.parenthood.isParent == 'true'"></i>
+                        <i class="fa fa-check-circle" ng-if="tweet.message.actor.verified"></i>
+                        <i class="fa fa-thumbs-up" ng-if="tweet.cde.content.sentiment.polarity == 'POSITIVE'"></i>
+                        <i class="fa fa-thumbs-down" ng-if="tweet.cde.content.sentiment.polarity == 'NEGATIVE'"></i>
+                        <span class="tweet-postedTime text-muted pull-right" data-livestamp="{{tweet.message.postedTime}}"></span>
+                      </div>
+                      <div class="tweet-body">{{tweet.message.body}}</div>
+                    </div>
+                  </div>
+                </a>
+              </ul>
+
+            </div>
+            <div class="tab-pane" id="tab-results-raw">
+              <div>
+                <pre id="results-raw" class="prettyprint linenums lang-java"></pre>
+              </div>
+            </div>
+          </div>
+      </div>
+      <div class="col-xs-6 results-personality">
+        <h2>Personality Insights</h2>
+        <textarea class="content form-control text-box" placeholder="Please enter a twitter handle..." name="text" required="true" rows="1"></textarea>
+        <button type="button" class="btn analysis-btn btn-full">Analyze Personality</button>
+        <div>
         <div style="display:none;" class="form-group row loading text-center loading">
           <h2>&nbsp;</h2>
           <img src="images/watson.gif">
@@ -123,11 +138,11 @@
       </div>
       <div style="display: none;" class="results">
         <div class="row">
-          <div class="col-lg-5 col-md-12 col-xs-12">
+          <div>
             <h3>Data Behind Your Personality</h3>
-            <div style="display: none;" class="col555px well traits"></div>
+            <div style="display: none;" class="well traits"></div>
           </div>
-          <div class="col-lg-7 col-xs-12 col-md-12">
+          <div>
             <h3>Visualization of Personality Data</h3>
             <div id="vizcontainer" class="well"></div>
           </div>
@@ -136,35 +151,66 @@
       <div class="hidden">
         <div id="header-template">
           <div class="row theader">
-            <div class="col-lg-7 col-xs-7">
+            <div class="col-lg-7 col-xs-">
               <span>Name</span>
             </div>
-            <div class="col-lg-5 col-xs-5 text-right">
+            <div class="text-right cdataol-xs-5 col-lg-5">
               <span>Value</span>
             </div>
           </div>
         </div>
         <div id="trait-template">
           <div class="row">
-            <div class="tname col-lg-7 col-xs-7">
+            <div class="tname col-xs-7 col-lg-7">
               <span></span>
             </div>
-            <div class="tvalue col-lg-5 col-xs-5 text-right">
+            <div class="tvalue col-xs-5 col-lg-5 text-right">
               <span></span>
             </div>
           </div>
         </div>
         <div id="model-template">
           <div class="row">
-            <div class="col-lg-12 col-xs-12 text-center">
+            <div class="text-center col-xs-12 col-lg-12">
               <span></span>
             </div>
           </div>
         </div>
       </div>
+      </div>
     </div>
   </div>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+  <script src="vendor/angular/angular.min.js"></script>
+  <script src="vendor/jquery/dist/jquery.min.js"></script>
+  <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="vendor/jquery-extendext/jQuery.extendext.min.js"></script>
+  <script src="vendor/doT/doT.min.js"></script>
+  <script src="vendor/momentjs/min/moment-with-locales.min.js"></script>
+  <script src="vendor/livestamp/livestamp.min.js"></script>
+  <script src="vendor/jQuery-QueryBuilder/dist/js/query-builder.min.js"></script>
+  <script src="vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+  <script src="vendor/google-code-prettify/bin/prettify.min.js"></script>
+  <script src="vendor/numeral/min/numeral.min.js"></script>
+  <script src="vendor/angular-numeraljs/dist/angular-numeraljs.min.js"></script>
+  <script src="vendor/angular-spinners/dist/angular-spinners.min.js"></script>
+  <script src="vendor/jsurl/lib/jsurl.js"></script>
+  <script src="vendor/angular-clipboard/angular-clipboard.js"></script>
+  <script src="vendor/angular-ui-notification/dist/angular-ui-notification.min.js"></script>
+  <script src="vendor/angularjs-socialshare/dist/angular-socialshare.min.js"></script>
+  <script>
+    ! function($) {
+      $(function() {
+        window.prettyPrint && prettyPrint()
+      })
+    }(window.jQuery)
+
+  </script>
+
+  <script src="js/app.js"></script>
+  <script src="js/search.service.js"></script>
+  <script src="js/search.controller.js"></script>
+  
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/2.10.0/d3.v2.min.js"></script>
   <script type="text/javascript" src="/js/demo.js"></script>
   <script type="text/javascript" src="/js/personality.js"></script>

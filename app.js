@@ -247,10 +247,6 @@ initPersonalityInsights();
 //i18n settings
 //require('./config/i18n')(app);
 
-//---Deployment Tracker---------------------------------------------------------
-
-require("cf-deployment-tracker-client").track();
-
 //---Twitter Service Initialization--------------------------------------------
 
 // load local VCAP configuration

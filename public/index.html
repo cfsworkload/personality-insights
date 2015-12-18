@@ -1,64 +1,56 @@
 <!DOCTYPE html>
-
 <html ng-app="app" lang="en">
-
-<head>
-  <title>Sentiment Analysis</title>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="google" content="notranslate" />
-
-  <link rel="icon" type="image/x-icon" href="https://hub.jazz.net/manage/web/com.ibm.team.jazzhub.web/graphics/common/favicon.ico?v=2"> 
-
-  <link rel="stylesheet" href="vendor/bootstrap/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="vendor/jQuery-QueryBuilder/dist/css/query-builder.default.min.css">
-  <link rel="stylesheet" href="vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css">
-  <link rel="stylesheet" href="vendor/google-code-prettify/bin/prettify.min.css">
-  <link rel="stylesheet" href="vendor/angular-ui-notification/dist/angular-ui-notification.min.css">
-
-  <link rel="stylesheet" href="css/index.css">
-
-  <script type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script>
-</head>
-
-<body ng-controller="SearchController as controller" ng-cloak>
-  <spinner name="spinner" usSpinner>
-    <div class="overlay"></div>
-    <div class="spinner">
-      <div class="double-bounce1"></div>
-      <div class="double-bounce2"></div>
-    </div>
-    <div class="please-wait">Searching...</div>
-  </spinner>
-
-  <div class="navbar">
-    <div class="nb-left-area">
-      <a class="nb-button-link top_home clickable">
+  <head>
+    <title>Sentiment Analysis</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google" content="notranslate" />
+    <link rel="icon" type="image/x-icon" href="https://hub.jazz.net/manage/web/com.ibm.team.jazzhub.web/graphics/common/favicon.ico?v=2">
+    <link rel="stylesheet" href="vendor/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/jQuery-QueryBuilder/dist/css/query-builder.default.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css">
+    <link rel="stylesheet" href="vendor/google-code-prettify/bin/prettify.min.css">
+    <link rel="stylesheet" href="vendor/angular-ui-notification/dist/angular-ui-notification.min.css">
+    <link rel="stylesheet" href="css/index.css">
+    <script type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script>
+  </head>
+  <body ng-controller="SearchController as controller" ng-cloak>
+    <spinner name="spinner" usSpinner>
+      <div class="overlay"></div>
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+      <div class="please-wait">Searching...</div>
+    </spinner>
+    <div class="navbar">
+      <div class="nb-left-area">
+        <a class="nb-button-link top_home clickable">
         <img class="nb-bluemix-logo" src="images/bluemix-logo.png">
-      </a>
-      <a class="nb-button-link top_home" >
+        </a>
+        <a class="nb-button-link top_home" >
         <span class="nb-devopsservices-text">IBM <b>Architecture Center</b></span>
-      </a>
-    </div>
-  </div>
-  <div class="container-fluid main-container">
-    <div class="container query">
-      <h2>Sentiment Analysis</h2>
-      <h3>Build Query</h3>
-      <div id="query-builder"></div>
-      <div class="twitter-buttons">
-        <button type="button" class="btn btn-full btn-twitter" ng-click="controller.search(true)">Twitter Count</button>
-        <button type="button" class="btn btn-full btn-twitter" ng-click="controller.search(false)">Twitter Search</button>
+        </a>
       </div>
     </div>
-    <div class="container main-results">
-      <div class="col-xs-6 results-tweets">
-        <h2>View Results</h2>
-        <ul class="nav nav-pills" role="tablist">
+    <div class="container-fluid main-container">
+      <div class="container query">
+        <h2>Sentiment Analysis</h2>
+        <h3>Build Query</h3>
+        <div id="query-builder"></div>
+        <div class="twitter-buttons">
+          <button type="button" class="btn btn-full btn-twitter" ng-click="controller.search(true)">Twitter Count</button>
+          <button type="button" class="btn btn-full btn-twitter" ng-click="controller.search(false)">Twitter Search</button>
+        </div>
+      </div>
+      <div class="container main-results">
+        <div class="col-xs-6 results-tweets">
+          <h2>View Results</h2>
+          <ul class="nav nav-pills" role="tablist">
             <li class="active">
               <a href="#tab-results" data-toggle="tab">
-                <b>{{controller.data.results.search.results | numeraljs:'0,0'}}</b> tweets</a>
+              <b>{{controller.data.results.search.results | numeraljs:'0,0'}}</b> tweets</a>
             </li>
             <li><a href="#tab-results-raw" data-toggle="tab">Source</a></li>
           </ul>
@@ -70,7 +62,6 @@
                   <input class="form-control" type="text" ng-model="controller.data.query" readonly>
                 </div>
               </div>
-
               <small ng-if="controller.data.results.tweets.length > 0">Note: this search interface only returns the first {{controller.data.results.tweets.length}} tweets.</small>
               <ul class="list-group">
                 <a href="#tab-selected-tweet" class="list-group-item" ng-repeat="tweet in controller.data.results.tweets">
@@ -96,7 +87,6 @@
                   </div>
                 </a>
               </ul>
-
             </div>
             <div class="tab-pane" id="tab-results-raw">
               <div>
@@ -104,122 +94,117 @@
               </div>
             </div>
           </div>
-      </div>
-      <div class="col-xs-6 results-personality">
-        <h2>Personality Insights</h2>
-        <textarea class="content form-control text-box" placeholder="Please enter a twitter handle..." name="text" required="true" rows="1"></textarea>
-        <button type="button" class="btn analysis-btn btn-full">Analyze Personality</button>
-        <div>
-        <div style="display:none;" class="form-group row loading text-center loading">
-          <h2>&nbsp;</h2>
-          <img src="images/watson.gif">
         </div>
-        <div style="display: none;" class="form-group row error">
-          <h2>&nbsp;</h2>
-          <div class="well">
-            <p class="errorMsg"></p>
-            <div style="display:none;margin-bottom:10px;" class="captcha">
-              <div data-sitekey="6LcRbQkTAAAAAGUFVbnuqDfse-XZASLZwoC34oJV" class="g-recaptcha"></div>
-            </div>
-          </div>
-        </div>
-        <div style="display: none;" class="results">
-          <h2>Your Personality*</h2>
-          <div class="well">
-            <div class="summary-div"></div>
-            <div style="color: gray" class="text-right">
-              <em class="small">*Compared to most people who participated in our surveys.</em>
-            </div>
-            <div style="color: gray" class="text-right">
-              <em class="small outputMessageFootnote"></em>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="display: none;" class="results">
-        <div class="row">
+        <div class="col-xs-6 results-personality">
+          <h2>Personality Insights</h2>
+          <textarea class="content form-control text-box" placeholder="Please enter a twitter handle..." name="text" required="true" rows="1"></textarea>
+          <button type="button" class="btn analysis-btn btn-full">Analyze Personality</button>
           <div>
-            <h3>Data Behind Your Personality</h3>
-            <div style="display: none;" class="well traits"></div>
+            <div style="display:none;" class="form-group row loading text-center loading">
+              <h2>&nbsp;</h2>
+              <img src="images/watson.gif">
+            </div>
+            <div style="display: none;" class="form-group row error">
+              <h2>&nbsp;</h2>
+              <div class="well">
+                <p class="errorMsg"></p>
+                <div style="display:none;margin-bottom:10px;" class="captcha">
+                  <div data-sitekey="6LcRbQkTAAAAAGUFVbnuqDfse-XZASLZwoC34oJV" class="g-recaptcha"></div>
+                </div>
+              </div>
+            </div>
+            <div style="display: none;" class="results">
+              <h2>Your Personality*</h2>
+              <div class="well">
+                <div class="summary-div"></div>
+                <div style="color: gray" class="text-right">
+                  <em class="small">*Compared to most people who participated in our surveys.</em>
+                </div>
+                <div style="color: gray" class="text-right">
+                  <em class="small outputMessageFootnote"></em>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3>Visualization of Personality Data</h3>
-            <div id="vizcontainer" class="well"></div>
+          <div style="display: none;" class="results">
+            <div class="">
+              <div>
+                <h3>Data Behind Your Personality</h3>
+                <div style="display: none;" class="well traits"></div>
+              </div>
+              <div>
+                <h3>Visualization of Personality Data</h3>
+                <div id="vizcontainer" class="well"></div>
+              </div>
+            </div>
+          </div>
+          <div class="hidden">
+            <div id="header-template">
+              <div class="row theader">
+                <div class="col-lg-7 col-xs-">
+                  <span>Name</span>
+                </div>
+                <div class="text-right cdataol-xs-5 col-lg-5">
+                  <span>Value</span>
+                </div>
+              </div>
+            </div>
+            <div id="trait-template">
+              <div class="row">
+                <div class="tname col-xs-7 col-lg-7">
+                  <span></span>
+                </div>
+                <div class="tvalue col-xs-5 col-lg-5 text-right">
+                  <span></span>
+                </div>
+              </div>
+            </div>
+            <div id="model-template">
+              <div class="row">
+                <div class="text-center col-xs-12 col-lg-12">
+                  <span></span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="hidden">
-        <div id="header-template">
-          <div class="row theader">
-            <div class="col-lg-7 col-xs-">
-              <span>Name</span>
-            </div>
-            <div class="text-right cdataol-xs-5 col-lg-5">
-              <span>Value</span>
-            </div>
-          </div>
-        </div>
-        <div id="trait-template">
-          <div class="row">
-            <div class="tname col-xs-7 col-lg-7">
-              <span></span>
-            </div>
-            <div class="tvalue col-xs-5 col-lg-5 text-right">
-              <span></span>
-            </div>
-          </div>
-        </div>
-        <div id="model-template">
-          <div class="row">
-            <div class="text-center col-xs-12 col-lg-12">
-              <span></span>
-            </div>
-          </div>
-        </div>
-      </div>
       </div>
     </div>
-  </div>
-
-  <script src="vendor/angular/angular.min.js"></script>
-  <script src="vendor/jquery/dist/jquery.min.js"></script>
-  <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
-  <script src="vendor/jquery-extendext/jQuery.extendext.min.js"></script>
-  <script src="vendor/doT/doT.min.js"></script>
-  <script src="vendor/momentjs/min/moment-with-locales.min.js"></script>
-  <script src="vendor/livestamp/livestamp.min.js"></script>
-  <script src="vendor/jQuery-QueryBuilder/dist/js/query-builder.min.js"></script>
-  <script src="vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-  <script src="vendor/google-code-prettify/bin/prettify.min.js"></script>
-  <script src="vendor/numeral/min/numeral.min.js"></script>
-  <script src="vendor/angular-numeraljs/dist/angular-numeraljs.min.js"></script>
-  <script src="vendor/angular-spinners/dist/angular-spinners.min.js"></script>
-  <script src="vendor/jsurl/lib/jsurl.js"></script>
-  <script src="vendor/angular-clipboard/angular-clipboard.js"></script>
-  <script src="vendor/angular-ui-notification/dist/angular-ui-notification.min.js"></script>
-  <script src="vendor/angularjs-socialshare/dist/angular-socialshare.min.js"></script>
-  <script>
-    ! function($) {
-      $(function() {
-        window.prettyPrint && prettyPrint()
-      })
-    }(window.jQuery)
-
-  </script>
-
-  <script src="js/app.js"></script>
-  <script src="js/search.service.js"></script>
-  <script src="js/search.controller.js"></script>
-  
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/2.10.0/d3.v2.min.js"></script>
-  <script type="text/javascript" src="/js/demo.js"></script>
-  <script type="text/javascript" src="/js/personality.js"></script>
-  <script type="text/javascript" src="/js/string-utils.js"></script>
-  <script type="text/javascript" src="/js/i18n.js"></script>
-  <script type="text/javascript" src="/js/textsummary.js"></script>
-  <script type="text/javascript">
-    textSummary.init('json');
-  </script>
-</body>
-
+    <script src="vendor/angular/angular.min.js"></script>
+    <script src="vendor/jquery/dist/jquery.min.js"></script>
+    <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="vendor/jquery-extendext/jQuery.extendext.min.js"></script>
+    <script src="vendor/doT/doT.min.js"></script>
+    <script src="vendor/momentjs/min/moment-with-locales.min.js"></script>
+    <script src="vendor/livestamp/livestamp.min.js"></script>
+    <script src="vendor/jQuery-QueryBuilder/dist/js/query-builder.min.js"></script>
+    <script src="vendor/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="vendor/google-code-prettify/bin/prettify.min.js"></script>
+    <script src="vendor/numeral/min/numeral.min.js"></script>
+    <script src="vendor/angular-numeraljs/dist/angular-numeraljs.min.js"></script>
+    <script src="vendor/angular-spinners/dist/angular-spinners.min.js"></script>
+    <script src="vendor/jsurl/lib/jsurl.js"></script>
+    <script src="vendor/angular-clipboard/angular-clipboard.js"></script>
+    <script src="vendor/angular-ui-notification/dist/angular-ui-notification.min.js"></script>
+    <script src="vendor/angularjs-socialshare/dist/angular-socialshare.min.js"></script>
+    <script>
+      ! function($) {
+        $(function() {
+          window.prettyPrint && prettyPrint();
+        });
+      }(window.jQuery);
+    </script>
+    <script src="js/app.js"></script>
+    <script src="js/search.service.js"></script>
+    <script src="js/search.controller.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/2.10.0/d3.v2.min.js"></script>
+    <script type="text/javascript" src="/js/demo.js"></script>
+    <script type="text/javascript" src="/js/personality.js"></script>
+    <script type="text/javascript" src="/js/string-utils.js"></script>
+    <script type="text/javascript" src="/js/i18n.js"></script>
+    <script type="text/javascript" src="/js/textsummary.js"></script>
+    <script type="text/javascript">
+      textSummary.init('json');
+    </script>
+  </body>
 </html>

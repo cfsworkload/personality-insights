@@ -1,5 +1,6 @@
 body {
-	background-color: #152935;
+	/*background-color: #152935;*/
+	background-color: #1f3a49;
 	padding-top: 50px;
 	color: white;
 }
@@ -9,7 +10,7 @@ h2 {
 }
 
 .navbar {
-	background: #152935;
+	background: #1f3a49;
 	height: 50px;
 	line-height: 50px;
 	font-weight: 300;
@@ -90,7 +91,7 @@ h2 {
 .btn-full {
 	border-radius: 0;
 	background-color: #eec218;
-	color: #152935;
+	color: #1f3a49;
 	padding: 6px 20px;
 	font-size: 18px;
 }
@@ -104,13 +105,13 @@ h2 {
 }
 
 .rules-group-container {
-	background: #152935 !important;
+	background: #1f3a49 !important;
 	border: none !important;
 }
 
 .rules-group-header > .btn-group > .btn {
 	border-radius: 0;
-	background-color: #152935;
+	background-color: #1f3a49;
 	color: #eec218;
 	padding: 6px 20px;
 	font-size: 18px;
@@ -119,13 +120,13 @@ h2 {
 .rules-group-header > .btn-group > .btn.active {
 	border-radius: 0;
 	background-color: #eec218;
-	color: #152935;
+	color: #1f3a49;
 	padding: 6px 20px;
 	font-size: 18px;
 }
 
 .rule-container {
-	background-color: #152935 !important;
+	background-color: #1f3a49 !important;
 	border-radius: 0 !important;
 	border: 1px solid #eec128 !important;
 	padding: 0 !important;
@@ -138,8 +139,7 @@ h2 {
 
 .btn-xs.btn-info, .btn-xs.btn-danger {
 	background-color: #eec128 !important;
-	border: 1px solid #152935 !important;
-	color: #152935 !important;
+	color: #1f3a49 !important;
 	border-radius: 0 !important;
 }
 
@@ -149,18 +149,18 @@ h2 {
 
 .nav-pills > li > a {
     border-radius: 0;
-    background-color: #152935;
+    background-color: #1f3a49;
     color: #eec128;
 }
 
 .nav-pills > li.active > a {
     background-color: #eec128;
-    color: #152935;
+    color: #1f3a49;
 }
 
 .nav-pills > li.active > a:focus {
     background-color: #eec128;
-    color: #152935;
+    color: #1f3a49;
 }
 
 .nav-pills > li > a:hover, .nav-pills > li.active > a:hover {
@@ -174,7 +174,7 @@ h2 {
 }
 
 .well {
-	background-color: #152935;
+	background-color: #1f3a49;
 	width: 80%;
 }
 
@@ -183,8 +183,8 @@ h2 {
 }
 
 .model_title  {
-	font-weight: 300;
-	font-size: 18px;
+	/*font-weight: 300;*/
+	font-size: 16px;
 }
 
 .traits {
@@ -201,4 +201,23 @@ h2 {
 
 svg {
 	fill: white;
+}
+
+.btn-info {
+	height: 0 !important;
+	width: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+.btn-danger {
+	height: 34px !important;
+}
+
+.row:nth-child(even) {
+	background: #294151;
+}
+
+.row {
+	padding: 2px 0;
 }

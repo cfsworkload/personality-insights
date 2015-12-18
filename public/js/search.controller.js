@@ -36,7 +36,7 @@
       console.info("Rules are", queryRules);
 
       // set the query as the URL so that it can be bookmarked
-      $location.search('query', JSURL.stringify(queryRules));
+      //$location.search('query', JSURL.stringify(queryRules));
 
       controller.data.link_to_share = $location.absUrl();
 
@@ -251,6 +251,22 @@ var queryLanguages = {
 // https://www.ng.bluemix.net/docs/services/Twitter/index.html#query_lang
 var queryFilters = [
   {
+    id: 'from',
+    label: 'From (@)',
+    type: 'string',
+    description: 'Matches Tweets from users with the preferredUsername twitterHandle. Must not contain the @ symbol.',
+    operators: ['equal', 'not_equal'],
+    data: convertSimpleSelect
+  },
+  {
+    id: 'hashtag',
+    label: 'Hashtag (#)',
+    type: 'string',
+    description: 'Matches Tweets with the hashtag #hashtag.',
+    operators: ['equal', 'not_equal'],
+    data: convertSimpleWord
+  },
+  {
     id: 'keyword',
     label: 'Keyword',
     type: 'string',
@@ -258,122 +274,6 @@ var queryFilters = [
     operators: ['equal', 'not_equal'],
     data: convertSimpleWord
   },
-  {
-    id: 'hashtag',
-    label: 'Hashtag',
-    type: 'string',
-    description: 'Matches Tweets with the hashtag #hashtag.',
-    operators: ['equal', 'not_equal'],
-    data: convertSimpleWord
-  },
-  {
-    id: 'bio_lang',
-    label: 'Bio Language',
-    type: 'string',
-    input: 'select',
-    description: 'Matches Tweets from users whose profile language settings match the specified language code.',
-    values: queryLanguages,
-    operators: ['equal', 'not_equal'],
-    data: convertSimpleSelect
-  },
-  {
-    id: 'bio_location',
-    label: 'Location',
-    type: 'string',
-    description: 'Matches Tweets from users whose profile location setting contains the specified location reference.',
-    operators: ['equal', 'not_equal'],
-    data: convertWithQuotes
-  },
-  {
-    id: 'country_code',
-    label: 'Country Code',
-    type: 'string',
-    description: 'Matches Tweets whose tagged place or location matches the specified country code.',
-    operators: ['equal', 'not_equal'],
-    data: convertSimpleSelect
-  },
-  {
-    id: 'followers_count',
-    label: 'Followers Count',
-    type: 'integer',
-    description: 'Matches Tweets from users that have a number of followers that fall within the specified range. The upper bound is optional and both limits are inclusive.',
-    operators: ['greater_or_equal', 'between', 'not_between'],
-    data: convertRange
-  },
-  {
-    id: 'friends_count',
-    label: 'Friends Count',
-    type: 'integer',
-    description: 'Matches Tweets from users that follow a number of users that fall within the specified range. The upper bound is optional and both limits are inclusive.',
-    operators: ['greater_or_equal', 'between', 'not_between'],
-    data: convertRange
-  },
-  {
-    id: 'from',
-    label: 'From',
-    type: 'string',
-    description: 'Matches Tweets from users with the preferredUsername twitterHandle. Must not contain the @ symbol.',
-    operators: ['equal', 'not_equal'],
-    data: convertSimpleSelect
-  },
-  {
-    id: 'has:children',
-    label: 'Author has children',
-    type: 'string',
-    input: 'radio',
-    description: 'Matches Tweets from users that have children.',
-    operators: ['equal'],
-    values: {
-      "true": "Yes",
-      "false": "No"
-    },
-    data: convertBoolean
-  },
-  {
-    id: 'is:married',
-    label: 'Author is married',
-    type: 'string',
-    input: 'radio',
-    description: 'Matches Tweets from users that are married.',
-    operators: ['equal'],
-    values: {
-      "true": "Yes",
-      "false": "No"
-    },
-    data: convertBoolean
-  },
-  {
-    id: 'is:verified',
-    label: 'Author is verified',
-    type: 'string',
-    input: 'radio',
-    description: 'Matches Tweets where the author has been verified by Twitter.',
-    operators: ['equal'],
-    values: {
-      "true": "Yes",
-      "false": "No"
-    },
-    data: convertBoolean
-  },
-  {
-    id: 'lang',
-    label: 'Language',
-    type: 'string',
-    input: 'select',
-    description: 'Matches Tweets from a particular language.',
-    values: queryLanguages,
-    operators: ['equal', 'not_equal'],
-    data: convertSimpleSelect
-  },
-  {
-    id: 'listed_count',
-    label: 'Listed Count',
-    type: 'integer',
-    description: 'Matches Tweets where Twitter\'s listing of the author falls within the specified range. The upper bound is optional and both limits are inclusive.',
-    operators: ['greater_or_equal', 'between', 'not_between'],
-    data: convertRange
-  },
-  //TODO point_radius:[longitude latitude radius]	
   {
     id: 'posted',
     label: 'Posted',
@@ -407,6 +307,106 @@ var queryFilters = [
     operators: ['equal'],
     data: convertSimpleSelect
   },
+  /*{
+    id: 'bio_lang',
+    label: 'Bio Language',
+    type: 'string',
+    input: 'select',
+    description: 'Matches Tweets from users whose profile language settings match the specified language code.',
+    values: queryLanguages,
+    operators: ['equal', 'not_equal'],
+    data: convertSimpleSelect
+  },*/
+  {
+    id: 'bio_location',
+    label: 'Location',
+    type: 'string',
+    description: 'Matches Tweets from users whose profile location setting contains the specified location reference.',
+    operators: ['equal', 'not_equal'],
+    data: convertWithQuotes
+  },
+  {
+    id: 'country_code',
+    label: 'Country Code',
+    type: 'string',
+    description: 'Matches Tweets whose tagged place or location matches the specified country code.',
+    operators: ['equal', 'not_equal'],
+    data: convertSimpleSelect
+  },
+  {
+    id: 'followers_count',
+    label: 'Followers Count',
+    type: 'integer',
+    description: 'Matches Tweets from users that have a number of followers that fall within the specified range. The upper bound is optional and both limits are inclusive.',
+    operators: ['greater_or_equal', 'between', 'not_between'],
+    data: convertRange
+  },
+  {
+    id: 'friends_count',
+    label: 'Friends Count',
+    type: 'integer',
+    description: 'Matches Tweets from users that follow a number of users that fall within the specified range. The upper bound is optional and both limits are inclusive.',
+    operators: ['greater_or_equal', 'between', 'not_between'],
+    data: convertRange
+  },
+  {
+    id: 'is:verified',
+    label: 'Author is verified',
+    type: 'string',
+    input: 'radio',
+    description: 'Matches Tweets where the author has been verified by Twitter.',
+    operators: ['equal'],
+    values: {
+      "true": "Yes",
+      "false": "No"
+    },
+    data: convertBoolean
+  },
+  {
+    id: 'has:children',
+    label: 'Author has children',
+    type: 'string',
+    input: 'radio',
+    description: 'Matches Tweets from users that have children.',
+    operators: ['equal'],
+    values: {
+      "true": "Yes",
+      "false": "No"
+    },
+    data: convertBoolean
+  },
+  {
+    id: 'is:married',
+    label: 'Author is married',
+    type: 'string',
+    input: 'radio',
+    description: 'Matches Tweets from users that are married.',
+    operators: ['equal'],
+    values: {
+      "true": "Yes",
+      "false": "No"
+    },
+    data: convertBoolean
+  },
+  {
+    id: 'lang',
+    label: 'Language',
+    type: 'string',
+    input: 'select',
+    description: 'Matches Tweets from a particular language.',
+    values: queryLanguages,
+    operators: ['equal', 'not_equal'],
+    data: convertSimpleSelect
+  },
+  /*{
+    id: 'listed_count',
+    label: 'Listed Count',
+    type: 'integer',
+    description: 'Matches Tweets where Twitter\'s listing of the author falls within the specified range. The upper bound is optional and both limits are inclusive.',
+    operators: ['greater_or_equal', 'between', 'not_between'],
+    data: convertRange
+  },*/
+  //TODO point_radius:[longitude latitude radius]	
   {
     id: 'statuses_count',
     label: 'Statuses Count',

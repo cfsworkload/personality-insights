@@ -90,10 +90,13 @@ $(document).ready(function() {
     $traits.hide();
     $results.hide();*/
 
+	var twitterHandle = $content.val();
+	if(twitterHandle.charAt(0) === '@')
+		twitterHandle = twitterHandle.substring(1);
 
     $.post("/api/db/tweets",
     {
-        name: $content.val()
+        name: twitterHandle
     }, function(data) {
     	console.log("got data from DB");
         $.ajax({

@@ -41,18 +41,12 @@ and you will be required to enter information about where the code will be deplo
 
 ## How the app works
 
-Go to the app's web interface by clicking the **Open the Deployed App** button in DevOps Services or by clicking the **Open URL** button in the Bluemix dashboard.
-
-At the top of the page there is a query builder you can use to search for Twitter data.
-
-The **Twitter Count** button returns the number of tweets that match the given query. The **Twitter Search** button returns 20 tweets that match the query and loads them
+1. Go to the app's web interface by clicking the **Open the Deployed App** button in DevOps Services or by clicking the **Open URL** button in the Bluemix dashboard.
+2. At the top of the page there is a query builder you can use to search for Twitter data.
+3. The **Twitter Count** button returns the number of tweets that match the given query. The **Twitter Search** button returns 20 tweets that match the query and loads them
 into dashDB.
-
-Once you have enough information from a single Twitter user (usually 20 tweets are enough), you can enter their Twitter username in the **Personality Insights** section. Clicking
-**Analyze Personality** will send all of that user's tweets to the Personality Insights
-service, and if there's enough data it will display a textual summary and visualization
-of the personality data the service returned. If an error is displayed, there may not
-be enough data from that Twitter user to perform an analysis.
+4. Once you have enough information from a single Twitter user (usually 20 tweets are enough), you can enter their Twitter username in the **Personality Insights** section.
+5. Clicking **Analyze Personality** will send all of the user's tweets to the Personality Insights service, and if there's enough data it will display a textual summary and visualization of the personality data the service returned. If an error is displayed, there may not be enough data from that Twitter user to perform an analysis.
 
 ## Search for Twitter data through Insights for Twitter
 
@@ -71,7 +65,7 @@ Now that the data is in the app, you can also view it in **dashDB**, a relationa
 database. If you want to take a look at it, navigate to the tile for the service in the
 Bluemix Dashboard and click **LAUNCH** in the top right.
 
-You can look at the Twitter data by going to **Tables** through the left navigation bar,
+You can look at the Twitter data by clicking **Tables** in the left navigation bar,
 and you can run your own SQL against the data by going to **Run SQL**.
 
 ## Analyze text with Personality Insights

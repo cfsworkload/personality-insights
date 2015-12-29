@@ -143,6 +143,10 @@ h2 {
 	border-radius: 0 !important;
 }
 
+.query-builder .rules-list>::before, .query-builder .rules-list>::after {
+	border-color: #eec128 !important;
+}
+
 .form-control {
 	border-radius: 0 !important;
 }
@@ -220,4 +224,10 @@ svg {
 
 .row {
 	padding: 2px 0;
+}
+
+@media only screen and (max-width: 992px) {
+    .col-xs-6 {
+		width: 100%;
+	}
 }

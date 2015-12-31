@@ -74,22 +74,6 @@ $(document).ready(function() {
   $('.analysis-btn').click(function(){
     $('.analysis-btn').blur();
 
-    // check if the captcha is active and the user complete it
-    /*var recaptcha = grecaptcha.getResponse();
-
-    // reset the captcha
-    grecaptcha.reset();
-
-    if ($captcha.css('display') === 'table' && recaptcha === '')
-      return;*/
-
-
-    /*$loading.show();
-    $captcha.hide();
-    $error.hide();
-    $traits.hide();
-    $results.hide();*/
-
 	var twitterHandle = $content.val();
 	if(twitterHandle.charAt(0) === '@')
 		twitterHandle = twitterHandle.substring(1);
@@ -381,11 +365,6 @@ function showVizualization(theProfile) {
   function onSampleTextChange() {
     var isEnglish = $('#english_radio').is(':checked');
     language = isEnglish ? 'en' : 'es';
-
-    /*$.get('/text/' + language + '.txt').done(function(text) {
-      $content.val(text);
-      updateWordsCount();
-    });/*/
   }
 
   onSampleTextChange();

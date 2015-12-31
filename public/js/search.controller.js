@@ -100,54 +100,10 @@
     } else {
       queryBuilder.queryBuilder('setRules', defaultQuery);
     }
-
-    // retrieve existing tracks
-    searchService.getTracks().then(
-      function (data) {
-        console.log("Found tracks ", data);
-        controller.data.tracks = data.tracks;
-      });
   }
 })();
 
 // Default query when none specified
-/*var defaultQuery = {
-  "condition": "AND",
-  "rules": [{
-    "id": "keyword",
-    "field": "keyword",
-    "type": "string",
-    "input": "text",
-    "operator": "equal",
-    "value": "ibm",
-    "data": {}
-  }, {
-    "id": "keyword",
-    "field": "keyword",
-    "type": "string",
-    "input": "text",
-    "operator": "equal",
-    "value": "insights",
-    "data": {}
-  }, {
-    "id": "keyword",
-    "field": "keyword",
-    "type": "string",
-    "input": "text",
-    "operator": "equal",
-    "value": "twitter",
-    "data": {}
-  }, {
-    "id": "posted",
-    "field": "posted",
-    "type": "date",
-    "input": "text",
-    "operator": "greater_or_equal",
-    "value": "2015-07-01",
-    "data": {}
-  }]
-};*/
-
 var defaultQuery = {
   "condition": "AND",
   "rules": [{
@@ -307,16 +263,6 @@ var queryFilters = [
     operators: ['equal'],
     data: convertSimpleSelect
   },
-  /*{
-    id: 'bio_lang',
-    label: 'Bio Language',
-    type: 'string',
-    input: 'select',
-    description: 'Matches Tweets from users whose profile language settings match the specified language code.',
-    values: queryLanguages,
-    operators: ['equal', 'not_equal'],
-    data: convertSimpleSelect
-  },*/
   {
     id: 'bio_location',
     label: 'Location',
@@ -397,16 +343,7 @@ var queryFilters = [
     values: queryLanguages,
     operators: ['equal', 'not_equal'],
     data: convertSimpleSelect
-  },
-  /*{
-    id: 'listed_count',
-    label: 'Listed Count',
-    type: 'integer',
-    description: 'Matches Tweets where Twitter\'s listing of the author falls within the specified range. The upper bound is optional and both limits are inclusive.',
-    operators: ['greater_or_equal', 'between', 'not_between'],
-    data: convertRange
-  },*/
-  //TODO point_radius:[longitude latitude radius]	
+  },	
   {
     id: 'statuses_count',
     label: 'Statuses Count',

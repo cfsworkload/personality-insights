@@ -265,46 +265,13 @@ var appEnvOpts = vcapLocal ? {
 var appEnv = cfenv.getAppEnv(appEnvOpts);
 
 var twitterCreds = appEnv.getServiceCreds("social-media-test-twitter");
-var twitter = require('./lib/twitter.js')(twitterCreds.url);
+var twitter = require('./js/twitter.js')(twitterCreds.url);
 
 // limit to the first 20 tweets
 var numTweets = 20;// default is 100, max is 500
 var tweetIndex = 0;// e.g. to get next 20, set this to 20, then 40, etc.
 
 //---App----------------------------------------------------------------------
-
-// add sample data
-// be careful with this! each call will return 6000 tweets, which is 0.12% of the free allowance
-// this may also overwhelm the server and/or the database?
-app.get("/api/twitter/sample", function (req, res) {
-	//var sampleTweets = "";
-	var twitterProfiles = ['BarackObama', 'realDonaldTrump', 'BernieSanders', 'HillaryClinton',
-			'marcorubio', 'officialjaden', 'katyperry', 'justinbieber', 'taylorswift13',
-			'KingJames', 'BillGates', 'Oprah'];
-	var maxTweets = 500;
-
-	for(var j in twitterProfiles) {
-		var query = "from:" + twitterProfiles[j];
-		console.log("Searching with", query);
-		twitter.search(query, maxTweets, tweetIndex, function (error, body) {
-			if (error) {
-				res.sendStatus(500);
-			}
-
-			var tweets = JSON.parse(JSON.stringify(body.tweets));
-			for(var i in tweets) {
-				setTimeout(function() {
-					insertTweetIntoDB(JSON.stringify(tweets[i]));
-				}, 500 * i);
-			}
-
-			//sampleTweets += body;
-		});
-	}
-
-	//res.send('sampleTweets');
-	res.send('success!');
-});
 
 // decahose count
 app.get("/api/twitter/messages/count", function (req, res) {
@@ -395,38 +362,6 @@ app.post('/api/db/tweets', function(req, res) {
 					var text = "";
 					for(var i in rowText) {
 						text += rowText[i].MESSAGE_BODY + "\n\n";
-					}
-					console.log("query result: " + text);
-					res.send(text);
-					conn.closeSync(function() {
-						console.log("Connection closed successfully.");
-					});
-				}
-			});
-		}
-	});
-});
-
-app.get('/api/db/authors', function(req, res) {
-	db.open(dashDBcredentials.dsn, function(err, conn) {
-		if(err) {
-			console.log("Unable to connect to dashDB");
-			console.error("Error: ", err);
-			return;
-		} else {
-			var query = "SELECT AUTHOR_PREFERRED_USERNAME FROM TWITTER_DB;";
-			console.log("query statement: " + query);
-			conn.query(query, function(err, rows) {
-				if(err) {
-					console.log("Unable to query dashDB");
-					console.error("Error: ", err);
-					return;
-				} else {
-					var rowText = JSON.parse(JSON.stringify(rows));
-					var text = {};
-					text.authors = [];
-					for(var i in rowText) {
-						text.authors.push(rowText[i]);
 					}
 					console.log("query result: " + text);
 					res.send(text);

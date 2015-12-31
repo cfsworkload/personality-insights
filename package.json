@@ -1,7 +1,7 @@
 {
-  "name": "insights-search-cloudant",
-  "version": "0.0.1",
-  "description": "A search interface for IBM Insights for Twitter",
+  "name": "social-media-test",
+  "version": "0.0.2",
+  "description": "A search interface to load Twitter data into a database and perform personality analysis of selected authors",
   "scripts": {
     "start": "node app.js",
     "postinstall": "bower install --allow-root"
@@ -33,7 +33,7 @@
     }
   ],
   "bugs": {
-    "url": "https://hub.jazz.net/git/nrchaney/insights-search-cloudant"
+    "url": "https://hub.jazz.net/git/nrchaney/social-media-test"
   },
   "license": "Apache-2.0"
 }

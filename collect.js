@@ -95,7 +95,7 @@ var appEnvOpts = vcapLocal ? {
 var appEnv = cfenv.getAppEnv(appEnvOpts);
 
 var twitterCreds = appEnv.getServiceCreds("insights-search-twitter");
-var twitter = require('./lib/twitter.js')(twitterCreds.url);
+var twitter = require('./js/twitter.js')(twitterCreds.url);
 
 var current = moment(argv.start, "YYYYMMDD");
 var end = moment(argv.end, "YYYYMMDD");

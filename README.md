@@ -44,7 +44,7 @@ and you will be required to enter information about where the code will be deplo
 1. Go to the app's web interface by clicking the **Open the Deployed App** button in DevOps Services or by clicking the **Open URL** button in the Bluemix dashboard.
 2. At the top of the page there is a query builder you can use to search for Twitter data.
 3. The **Twitter Count** button returns the number of tweets that match the given query. The **Twitter Search** button returns 20 tweets that match the query and loads them
-into dashDB.
+into dashDB. (You can change the number of tweets returned in the code.)
 4. Once you have enough information from a single Twitter user (usually 20 tweets are enough), you can enter their Twitter username in the **Personality Insights** section.
 5. Clicking **Analyze Personality** will send all of the user's tweets to the Personality Insights service, and if there's enough data it will display a textual summary and visualization of the personality data the service returned. If an error is displayed, there may not be enough data from that Twitter user to perform an analysis.
 

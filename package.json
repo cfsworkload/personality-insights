@@ -1,6 +1,6 @@
 {
-  "name": "social-media-test",
-  "version": "0.0.2",
+  "name": "sentiment-analysis-ac",
+  "version": "0.1.0",
   "description": "A search interface to load Twitter data into a database and perform personality analysis of selected authors",
   "scripts": {
     "start": "node app.js",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/IBM-Bluemix/insights-search.git"
+    "url": "https://hub.jazz.net/git/cfsworkload/sentiment-analysis-ac.git"
   },
   "author": "IBM Corp.",
   "contributors": [
@@ -33,7 +33,7 @@
     }
   ],
   "bugs": {
-    "url": "https://hub.jazz.net/git/nrchaney/social-media-test"
+    "url": "https://hub.jazz.net/git/cfsworkload/sentiment-analysis-ac"
   },
   "license": "Apache-2.0"
 }

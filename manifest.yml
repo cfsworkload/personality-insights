@@ -14,7 +14,7 @@ applications:
   - social-media-test-twitter
   - social-media-test-personality
   - social-media-test-dashdb
-  name: social-media-test
-  host: social-media-test
+  name: sentiment-analysis-ac
+  host: sentiment-analysis-ac
   path: .
   memory: 256M

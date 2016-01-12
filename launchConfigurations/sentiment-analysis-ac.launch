@@ -3,10 +3,10 @@
   "Params": {
     "Target": {
       "Url": "https://api.ng.bluemix.net",
-      "Org": "NRChaney",
-      "Space": "Work"
+      "Org": "cfsworkload",
+      "Space": "dev"
     },
-    "Name": "social-media-test",
+    "Name": "sentiment-analysis-ac",
     "Instrumentation": {
       "domain": "mybluemix.net"
     }

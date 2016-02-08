@@ -1,19 +1,19 @@
-# Sentiment Analysis
+# Personality Insights
 
 ### Social Media Analysis
 
-The Sentiment Analysis application demonstrates how you can use the services **Insights for Twitter**, **dashDB**, and **Personality Insights** to gather and analyze Twitter data.
+The Personality Insights application demonstrates how you can use the services **Insights for Twitter**, **dashDB**, and **Personality Insights** to gather and analyze Twitter data.
 
 ## Introduction
 
-This Sentiment Analysis sample application has been created so you can deploy it into your personal DevOps space after signing up for Bluemix and DevOps Services. You will
+This Personality Insights sample application has been created so you can deploy it into your personal DevOps space after signing up for Bluemix and DevOps Services. You will
 attach the **Insights for Twitter**, **dashDB**, and **Personality Insights** services.
 Once the application is set up, you will be able to search for tweets matching certain criteria, load them into a database, and analyze the personality of any Twitter user
 for which you have enough data in the database.
 
 If you already know how Bluemix works and you want to automate forking the project, and editing the launch configuration, click the **Deploy to Bluemix** button below. Once the deployment is finished, jump to **How the app works**.
 
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://hub.jazz.net/git/cfsworkload/sentiment-analysis-ac)
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://hub.jazz.net/git/cfsworkload/personality-insights-ac)
 
 ## Fork the Project to your personal DevOps space
 

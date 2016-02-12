@@ -13,7 +13,7 @@ for which you have enough data in the database.
 
 If you already know how Bluemix works and you want to automate forking the project, and editing the launch configuration, click the **Deploy to Bluemix** button below. Once the deployment is finished, jump to **How the app works**.
 
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://hub.jazz.net/git/cfsworkload/personality-insights-ac)
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/cfsworkload/personality-insights.git)
 
 ## Fork the Project to your personal DevOps space
 
